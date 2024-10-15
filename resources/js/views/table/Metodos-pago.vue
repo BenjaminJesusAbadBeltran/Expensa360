@@ -1,52 +1,67 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input
-        v-model="query.keyword" style="width: 400px;" placeholder="Search by name" class="filter-item"
-        @keyup.enter.native="handleFilter" />
+      <el-input v-model="query.keyword" style="width: 400px;" placeholder="Buscar por Tipo de Cuenta"
+        class="filter-item" @keyup.enter.native="handleFilter" />
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         {{ $t('table.search') }}
       </el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-plus" @click="handleCreate">
+      <el-button class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-plus"
+        @click="handleCreate">
         {{ $t('table.add') }}
       </el-button>
+      <el-checkbox v-model="filterStatus" @change="filterByStatus" class="filter-item" style="margin-left: 10px;">
+        Expensas Eliminadas
+      </el-checkbox>
     </div>
-
-    <el-table v-loading="loading" :data="list" border fit highlight-current-row style="width: 100%">
+    <el-table v-loading="loading" :data="list" border fit highlight-current-row style="width: 80%; ">
       <el-table-column prop="idMetodo" label="ID" width="80" />
-      <el-table-column prop="nombre" label="Name" />
-      <el-table-column prop="cuenta" label="Account" />
-      <el-table-column prop="idStatus" label="Status" />
-      <el-table-column label="Actions" width="180">
+      <el-table-column prop="nombre" label="Tipo de Cuenta" width="220" />
+      <el-table-column prop="cuenta" label="Numero de Cuenta" width="250" />
+      <el-table-column label="Acciones" width="300">
         <template slot-scope="scope">
-          <el-button size="mini" @click="handleEdit(scope.row.idMetodo)">Edit</el-button>
-          <el-button size="mini" type="danger" @click="handleDelete(scope.row.idMetodo, scope.row.nombre)">Delete</el-button>
+          <el-button size="mini" type="warning" @click="handleEdit(scope.row.idMetodo)">Edit</el-button>
+          <el-button v-show="scope.row.idStatus == 0" size="mini" type="success"
+            @click="handleRestore(scope.row)">Restore</el-button>
+          <el-button v-show="scope.row.idStatus !== 0" size="mini" type="danger"
+          @click="handleDelete(scope.row.idExpensa, scope.row.montoPagar)">Eliminar</el-button>
+          <el-button size="mini" type="info" @click="showImage(scope.row.imagen)">Show Image</el-button>
         </template>
       </el-table-column>
     </el-table>
-
-    <pagination v-show="total > 0" :total="total" :page.sync="query.page" :limit.sync="query.limit" @pagination="getList" />
+    <pagination v-show="total > 0" :total="total" :page.sync="query.page" :limit.sync="query.limit"
+      @pagination="getList" />
 
     <el-dialog :visible.sync="dialogFormVisible" :title="dialogTitle">
       <div v-loading="loading" class="form-container">
         <el-form :model="newMetodoPago" ref="metodoPagoForm" :rules="rules">
-          <el-form-item label="Name" prop="nombre" :label-width="formLabelWidth">
+          <el-form-item label="Tipo de Cuenta" prop="nombre" :label-width="formLabelWidth">
             <el-input v-model="newMetodoPago.nombre" autocomplete="off" />
           </el-form-item>
-          <el-form-item label="Account" prop="cuenta" :label-width="formLabelWidth">
+          <el-form-item label="Numero de Cuenta" prop="cuenta" :label-width="formLabelWidth">
             <el-input v-model="newMetodoPago.cuenta" autocomplete="off" />
           </el-form-item>
-            <el-form-item label="Status" prop="idStatus" :label-width="formLabelWidth">
+          <el-form-item label="Imagen" prop="imagen" :label-width="formLabelWidth">
+            <input type="file" @change="handleImageChange" />
+          </el-form-item>
+          <el-form-item label="Estado de Visualizacion" prop="idStatus" :label-width="formLabelWidth">
             <el-select v-model="newMetodoPago.idStatus" placeholder="Select Status">
               <el-option label="Activo" :value="1"></el-option>
               <el-option label="Inactivo" :value="0"></el-option>
             </el-select>
-            </el-form-item>
+          </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button @click="dialogFormVisible = false">Cancel</el-button>
           <el-button type="primary" @click="dialogStatus === 'create' ? createData() : updateData()">Confirm</el-button>
         </div>
+      </div>
+    </el-dialog>
+
+    <el-dialog :visible.sync="imageDialogVisible" title="Image">
+      <img :src="imageSrc" alt="Image" style="width: 100%;" />
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="imageDialogVisible = false">Close</el-button>
       </div>
     </el-dialog>
   </div>
@@ -65,6 +80,7 @@ export default {
   directives: { waves },
   data() {
     return {
+      filterStatus: false,
       list: null,
       total: 0,
       loading: true,
@@ -80,13 +96,14 @@ export default {
       rules: {
         nombre: [{ required: true, message: 'The nombre field is required.', trigger: 'blur' }],
         cuenta: [{ required: true, message: 'The cuenta field is required.', trigger: 'blur' }],
-        idStatus: [{ required: true, message: 'The id status field is required.', trigger: 'blur' }],
       },
-      formLabelWidth: '120px',
+      formLabelWidth: '200px',
       textMap: {
         update: 'Edit',
         create: 'Create',
       },
+      imageDialogVisible: false,
+      imageSrc: '',
     };
   },
   created() {
@@ -103,6 +120,10 @@ export default {
     },
     handleFilter() {
       this.query.page = 1;
+      this.getList();
+    },
+    filterByStatus() {
+      this.query.idStatus = this.filterStatus ? 0 : null;
       this.getList();
     },
     handleCreate() {
@@ -131,7 +152,7 @@ export default {
               this.handleFilter();
             })
             .catch(error => {
-                console.log(error);
+              console.log(error);
             })
             .finally(() => {
               this.loading = false;
@@ -179,6 +200,7 @@ export default {
             type: 'success',
             duration: 2000,
           });
+          this.getList();
         }
       });
     },
@@ -208,8 +230,49 @@ export default {
       this.newMetodoPago = {
         nombre: '',
         cuenta: '',
+        imagen: '',
         idStatus: 1,
       };
+    },
+    handleImageChange(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.newMetodoPago.imagen = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    },
+    showImage(image) {
+      this.imageSrc = `/storage/${image}`;
+      this.imageDialogVisible = true;
+    },
+    async handleRestore(metodoPago) {
+      this.$confirm(`Esta seguro de restaurar ${metodoPago.nombre}?`, 'Warning', {
+        confirmButtonText: 'OK',
+        cancelButtonText: 'Cancel',
+        type: 'warning',
+      }).then(async () => {
+        try {
+          const response = await metodoPagoResource.get(metodoPago.idMetodo);
+          if (response && response.data) {
+            const updatedMetodoPago = { ...response.data, idStatus: 1 };
+            await metodoPagoResource.update(metodoPago.idMetodo, updatedMetodoPago);
+            this.getList();
+            this.$message({
+              message: 'MetodoPago restored successfully',
+              type: 'success',
+            });
+          } else {
+            this.$message.error('Failed to fetch data');
+          }
+        } catch (error) {
+          this.$message.error('An error occurred while recovering data');
+        }
+      }).catch(() => {
+        this.$message.info('Restore cancelled');
+      });
     },
   },
 };
@@ -217,14 +280,17 @@ export default {
 
 <style lang="scss" scoped>
 .app-container {
-  padding: 20px;
+  padding: 40px;
 }
+
 .filter-container {
   margin-bottom: 20px;
 }
+
 .filter-item {
   margin-right: 10px;
 }
+
 .dialog-footer {
   text-align: right;
 }

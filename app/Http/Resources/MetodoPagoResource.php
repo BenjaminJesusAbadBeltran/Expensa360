@@ -18,6 +18,7 @@ class MetodoPagoResource extends JsonResource
             'idMetodo' => $this->idMetodo,
             'nombre' => $this->nombre,
             'cuenta' => $this->cuenta,
+            'imagen' => $this->imagen,
             'idStatus' => $this->idStatus,
             // 'created_at' => $this->created_at,
             // 'updated_at' => $this->updated_at,

@@ -3,7 +3,7 @@
     <div class="login-container">
       <div class="login-image" :style="{ 'background-image': 'url(' + loginBackground + ')' }">
         <div class="photo-credit">
-          <h4>Edificio {Nombre del Edificio}</h4>
+          <h4>Edificio "Santiago"</h4>
           <span>SysAdmin: Benjamin Beltran</span>
         </div>
       </div>

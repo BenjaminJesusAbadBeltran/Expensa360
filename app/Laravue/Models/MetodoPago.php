@@ -16,6 +16,8 @@ class MetodoPago extends Model
     protected $fillable = [
         'nombre',
         'cuenta',
+        'imagen',
         'idStatus',
     ];
+
 }

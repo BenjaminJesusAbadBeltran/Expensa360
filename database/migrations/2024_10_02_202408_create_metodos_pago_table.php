@@ -17,6 +17,7 @@ class CreateMetodosPagoTable extends Migration
             $table->id('idMetodo');
             $table->string('nombre', 45);
             $table->string('cuenta', 45);
+            $table->string('imagen')->nullable();
             $table->integer('idStatus');
             $table->timestamps();
         });

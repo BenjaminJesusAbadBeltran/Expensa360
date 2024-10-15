@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\BaseController;
 use Illuminate\Support\Arr;
 use App\Http\Resources\MetodoPagoResource;
 use Validator;
+use Illuminate\Support\Facades\Storage;
 
 class MetodoPagoController extends BaseController
 {
@@ -21,13 +22,18 @@ class MetodoPagoController extends BaseController
      */
     public function index(Request $request)
     {
-        $searchParams = $request->all();        
-        $metodoPagoQuery = MetodoPago::where('idStatus', 1); // Filtrar por idStatus = 1
+        $searchParams = $request->all();
+        $metodoPagoQuery = MetodoPago::query();
         $limit = Arr::get($searchParams, 'limit', static::ITEM_PER_PAGE);
         $keyword = Arr::get($searchParams, 'keyword', '');
+        $idStatus = Arr::get($searchParams, 'idStatus', 1); // Default to 1
 
         if (!empty($keyword)) {
             $metodoPagoQuery->where('nombre', 'LIKE', '%' . $keyword . '%');
+        }
+
+        if (!is_null($idStatus)) {
+            $metodoPagoQuery->where('idStatus', $idStatus);
         }
 
         return MetodoPagoResource::collection($metodoPagoQuery->paginate($limit));
@@ -41,27 +47,28 @@ class MetodoPagoController extends BaseController
      */
     public function store(Request $request)
     {
-        $validator = Validator::make(
-            $request->all(),
-            [
+        $validatedData = $request->validate([
             'nombre' => 'required|string|max:255',
             'cuenta' => 'required|string|max:255',
-            'idStatus' => 'required|integer',
-            ]
-        );
+            'idStatus' => 'required|integer|in:0,1',
+            'imagen' => 'nullable|string', // Validar que la imagen es una cadena base64
+        ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 403);
-        } else {
-            $params = $request->all();
-            $metodoPago = MetodoPago::create([
-            'nombre' => $params['nombre'],
-            'cuenta' => $params['cuenta'],
-            'idStatus' => $params['idStatus'],
-            ]);
-
-            return new MetodoPagoResource($metodoPago);
+        $validatedData['idStatus'] = $validatedData['idStatus'] ?? 1;
+    
+        if (!empty($metodoPago['imagen'])) {
+            $imageData = $metodoPago['imagen'];
+            $fileName = 'metodo_pago_' . time() . '.png';
+            Storage::disk('public')->put($fileName, base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $imageData)));
+            $metodoPago['imagen'] = $fileName;
         }
+    
+        $metodoPago = new MetodoPago($validatedData);
+        $metodoPago->save();
+
+        return new MetodoPagoResource($metodoPago);
+    
+        // return response()->json(['message' => 'Método de pago creado con éxito', 'data' => new MetodoPagoResource($metodoPago)]);
     }
 
     /**
@@ -70,16 +77,15 @@ class MetodoPagoController extends BaseController
      * @param  \App\Laravue\Models\MetodoPago  $metodoPago
      * @return \Illuminate\Http\Response
      */
-    // MetodoPagoController.php
     public function show($id)
     {
         $metodoPago = MetodoPago::find($id);
-    
+
         if (!$metodoPago) {
             return response()->json(['message' => 'MetodoPago not found'], 404);
         }
 
-        return response()->json(['data' => $metodoPago], 200);
+        return new MetodoPagoResource($metodoPago);
     }
 
     /**
@@ -89,23 +95,33 @@ class MetodoPagoController extends BaseController
      * @param  \App\Laravue\Models\MetodoPago  $metodoPago
      * @return \Illuminate\Http\Response
      */
-    // MetodoPagoController.php
     public function update(Request $request, $id)
     {
-        $metodoPago = MetodoPago::find($id);
+        $validatedData = $request->validate([
+            'nombre' => 'required|string|max:255',
+            'cuenta' => 'required|string|max:255',
+            'idStatus' => 'required|integer',
+            'imagen' => 'nullable|string', // Validar que la imagen es una cadena base64
+        ]);
 
-        if (!$metodoPago) {
-            return response()->json(['message' => 'MetodoPago not found'], 404);
+        $metodoPago = MetodoPago::findOrFail($id);
+        $metodoPago->fill($validatedData);
+
+        if (!empty($request->imagen)) {
+            // Eliminar la imagen anterior si existe
+            if ($metodoPago->imagen) {
+                Storage::disk('public')->delete($metodoPago->imagen);
+            }
+            $imageData = $request->imagen;
+            $fileName = 'metodo_pago_' . time() . '.png';
+            Storage::disk('public')->put($fileName, base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $imageData)));
+            $metodoPago->imagen = $fileName;
         }
 
-        $metodoPago->nombre = $request->input('nombre');
-        $metodoPago->cuenta = $request->input('cuenta');
-        $metodoPago->idStatus = $request->input('idStatus');
         $metodoPago->save();
 
-        return response()->json(['data' => $metodoPago], 200);
+        return new MetodoPagoResource($metodoPago);
     }
-
     /**
      * Remove the specified resource from storage.
      *
@@ -120,9 +136,15 @@ class MetodoPagoController extends BaseController
             return response()->json(['message' => 'MetodoPago not found'], 404);
         }
 
-        $metodoPago->idStatus = 0;
+        // Delete imagen if exists
+        if ($metodoPago->imagen) {
+            Storage::disk('public')->delete($metodoPago->imagen);
+            $metodoPago->imagen = null; // Clear the imagen field
+        }
+
+        $metodoPago->idStatus = 0; // Desactivar el método de pago en lugar de eliminarlo
         $metodoPago->save();
 
-        return response()->json(['message' => 'MetodoPago deleted successfully'], 200);
+        return new MetodoPagoResource($metodoPago);
     }
 }
