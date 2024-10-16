@@ -190,6 +190,10 @@ export default {
     'confirmPassword': 'Confirmar contraseña',
     'name': 'Nombre',
     'email': 'Correo electrónico',
+    'apellidoMaterno': 'Apellido Materno',
+    'apellidoPaterno': 'Apellido Paterno',
+    'nombre': 'Nombre',
+    'telefono': 'Telefono'
   },
   roles: {
     description: {

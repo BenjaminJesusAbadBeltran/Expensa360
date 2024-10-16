@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
             'apellidoMaterno' => 'Admin',
             'email' => 'admin@laravue.dev',
             'telefono' => '1234567890',
-            'idStatus' => 1,
+            'status' => 'Activo',
             'password' => Hash::make('laravue'),
         ]);
         $directivo = User::create([
@@ -29,7 +29,7 @@ class DatabaseSeeder extends Seeder
             'apellidoMaterno' => 'Directivo',
             'email' => 'directivo@laravue.dev',
             'telefono' => '1234567890',
-            'idStatus' => 1,
+            'status' => 'Activo',
             'password' => Hash::make('laravue'),
         ]);
         $admin = User::create([
@@ -38,7 +38,7 @@ class DatabaseSeeder extends Seeder
             'apellidoMaterno' => 'Administrador',
             'email' => 'administrador@laravue.dev',
             'telefono' => '1234567890',
-            'idStatus' => 1,
+            'status' => 'Activo',
             'password' => Hash::make('laravue'),
         ]);
         $socio = User::create([
@@ -47,7 +47,7 @@ class DatabaseSeeder extends Seeder
             'apellidoMaterno' => 'Socio',
             'email' => 'Socio@laravue.dev',
             'telefono' => '1234567890',
-            'idStatus' => 1,
+            'status' => 'Activo',
             'password' => Hash::make('laravue'),
         ]);
         $inquilino = User::create([
@@ -56,7 +56,7 @@ class DatabaseSeeder extends Seeder
             'apellidoMaterno' => 'Inquilino',
             'email' => 'Inquilino@laravue.dev',
             'telefono' => '1234567890',
-            'idStatus' => 1,
+            'status' => 'Activo',
             'password' => Hash::make('laravue'),
         ]);
 

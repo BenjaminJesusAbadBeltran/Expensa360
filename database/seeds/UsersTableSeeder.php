@@ -39,7 +39,7 @@ class UsersTableSeeder extends Seeder
                 'email' => strtolower($name) . '@laravue.dev',
                 'password' => Hash::make('laravue'),
                 'telefono' => '1234567890',
-                'idStatus' => 1,
+                'status' => 'Activo',
             ]);
 
             $role = Role::findByName($roleName);

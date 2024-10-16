@@ -7,9 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Spatie\Permission\Traits\HasRoles;
 use Laravel\Sanctum\HasApiTokens;
 use App\Laravue\Models\Servicio;
-use App\Laravue\Models\UsuarioServicio;
 use App\Laravue\Models\Expensa;
-use App\Laravue\Models\UsuarioExpensa;
 use App\Laravue\Models\Propiedad;
 use App\Laravue\Models\UsuarioPropiedad;
 use App\Laravue\Models\Pago;
@@ -40,7 +38,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'nombre', 'email', 'password', 'google_id','email_verified_at',
+        'nombre', 'apellidoPaterno', 'apellidoMaterno', 'email', 'password', 'google_id','email_verified_at','status','telefono'
     ];
 
     /**
@@ -110,16 +108,6 @@ class User extends Authenticatable
         }
 
         return false;
-    }
-
-    public function servicios()
-    {
-        return $this->belongsToMany(Servicio::class)->using(UsuarioServicio::class);
-    }
-
-    public function expensas()
-    {
-        return $this->belongsToMany(Expensa::class, 'usuario_expensa', 'idUsuario', 'idExpensa')->using(UsuarioExpensa::class);
     }
 
     public function propiedades()

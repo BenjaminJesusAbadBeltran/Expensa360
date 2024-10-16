@@ -37,9 +37,14 @@ class UserController extends BaseController
         $limit = Arr::get($searchParams, 'limit', static::ITEM_PER_PAGE);
         $role = Arr::get($searchParams, 'role', '');
         $keyword = Arr::get($searchParams, 'keyword', '');
+        $status = Arr::get($searchParams, 'status', 'Activo');
 
         if (!empty($role)) {
             $userQuery->whereHas('roles', function($q) use ($role) { $q->where('name', $role); });
+        }
+
+        if (!is_null($status)) {
+            $userQuery->where('status', $status);
         }
 
         if (!empty($keyword)) {
@@ -56,6 +61,7 @@ class UserController extends BaseController
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+
     public function store(Request $request)
     {
         $validator = Validator::make(
@@ -73,18 +79,26 @@ class UserController extends BaseController
             return response()->json(['errors' => $validator->errors()], 403);
         } else {
             $params = $request->all();
+
+            // Verifica si el campo status está presente, si no, asigna 'Activo'
+            $status = $request->has('status') ? $request->input('status') : 'Activo';
+
             $user = User::create([
                 'nombre' => $params['nombre'],
+                'apellidoPaterno' => $params['apellidoPaterno'],
+                'apellidoMaterno' => $params['apellidoMaterno'],
                 'email' => $params['email'],
+                'telefono' => $params['telefono'],
                 'password' => Hash::make($params['password']),
+                'status' => $status // Usa el valor de status
             ]);
+
             $role = Role::findByName($params['role']);
             $user->syncRoles($role);
 
             return new UserResource($user);
         }
     }
-
     /**
      * Display the specified resource.
      *
@@ -182,7 +196,8 @@ class UserController extends BaseController
         }
 
         try {
-            $user->delete();
+            $user->status = 'Inactivo';
+            $user->save();
         } catch (\Exception $ex) {
             return response()->json(['error' => $ex->getMessage()], 403);
         }
@@ -216,7 +231,11 @@ class UserController extends BaseController
     {
         return [
             'nombre' => 'required',
+            'apellidoPaterno' => 'required',
+            'apellidoMaterno' => 'required',
+            'telefono' => 'required',
             'email' => $isNew ? 'required|email|unique:users' : 'required|email',
+            'status' => 'required|in:Activo,Borrado',
             'roles' => [
                 'required',
                 'array'
