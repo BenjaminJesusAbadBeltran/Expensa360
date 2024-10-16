@@ -150,13 +150,13 @@
       </el-tab-pane>
       <el-tab-pane v-loading="updating" label="Account" name="third">
         <el-form-item label="Name">
-          <el-input v-model="user.name" :disabled="user.role === 'admin'" />
+          <el-input v-model="user.name" :disabled="user.role === 'super_admin'" />
         </el-form-item>
         <el-form-item label="Email">
-          <el-input v-model="user.email" :disabled="user.role === 'admin'" />
+          <el-input v-model="user.email" :disabled="user.role === 'super_admin'" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :disabled="user.role === 'admin'" @click="onSubmit">
+          <el-button type="primary" :disabled="user.role === 'super_admin'" @click="onSubmit">
             Update
           </el-button>
         </el-form-item>

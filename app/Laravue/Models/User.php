@@ -129,6 +129,6 @@ class User extends Authenticatable
 
     public function pagos()
     {
-        return $this->belongsToMany(Pago::class)->using(UsuarioPago::class);
+        return $this->belongsToMany(Pago::class, 'usuario_pago', 'idUsuario', 'idPago')->using(UsuarioPago::class);
     }
 }

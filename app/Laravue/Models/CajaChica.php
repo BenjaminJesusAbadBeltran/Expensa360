@@ -62,7 +62,7 @@ class CajaChica extends Model
     public function isAdmin(): bool
     {
         foreach ($this->roles as $role) {
-            if ($role->name === 'admin') {
+            if ($role->name === 'super_admin') {
                 return true;
             }
         }

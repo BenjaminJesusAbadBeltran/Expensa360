@@ -19,7 +19,7 @@ class CreatePropiedadesTable extends Migration
             $table->string('piso');
             $table->string('nombre');
             $table->string('tipo_propiedad');
-            $table->integer('idStatus');
+            $table->enum('status', ['Activo', 'Borrado'])->default('Activo');
             $table->timestamps();
         });
     }

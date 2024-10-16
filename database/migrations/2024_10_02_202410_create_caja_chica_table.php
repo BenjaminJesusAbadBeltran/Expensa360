@@ -15,7 +15,12 @@ class CreateCajaChicaTable extends Migration
     {
         Schema::create('caja_chica', function (Blueprint $table) {
             $table->id('idCajaChica');
-            $table->decimal('total', 15, 2);
+            $table->decimal('saldoInicial', 15, 2);
+            $table->decimal('saldoActual', 15, 2);
+            $table->decimal('saldoFinal', 15, 2);
+            $table->date('fecha_Inicial');
+            $table->date('fecha_Final')->nullable();
+            $table->enum('status', ['Activo', 'Borrado'])->default('Activo');
             $table->timestamps();
         });
     }

@@ -18,7 +18,7 @@ class CreateReportesTable extends Migration
             $table->foreignId('idGenerador')->constrained('users', 'idUsuario');
             $table->string('tipo_reporte', 65);
             $table->json('datos_generados');
-            $table->integer('idStatus');
+            $table->enum('status', ['Activo', 'Borrado'])->default('Activo');
             $table->timestamps();
         });
     }

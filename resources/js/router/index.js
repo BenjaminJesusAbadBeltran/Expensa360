@@ -236,6 +236,20 @@ export const asyncRoutes = [
       },
     ],
   },
+  {
+    path: '/IA',
+    component: Layout,
+    redirect: '/ai/logistic',
+    meta: { title: 'Inteligencia Artificial', icon: 'ai' },
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/intell'),
+        name: 'Analisis',
+        meta: { title: 'analisis' },
+      },
+    ],
+  },
   /* {
     path: '/pdf/download',
     component: () => import('@/views/pdf/Download'),

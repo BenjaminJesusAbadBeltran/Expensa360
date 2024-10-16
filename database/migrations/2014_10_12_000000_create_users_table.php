@@ -24,6 +24,7 @@ class CreateUsersTable extends Migration
             $table->integer('idStatus')->nullable();
             $table->string('password');
             $table->rememberToken();
+            $table->enum('status', ['Activo', 'Inactivo'])->default('Activo');
             $table->timestamps();
         });
     }

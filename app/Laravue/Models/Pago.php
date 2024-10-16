@@ -37,7 +37,7 @@ class Pago extends Model
      */
     public function metodoPago()
     {
-        return $this->belongsTo(MetodoPago::class, 'idMetodoPago');
+        return $this->belongsTo(MetodoPago::class, 'idMetodoPago', 'idMetodo'); // Especifica las columnas correctas
     }
 
     /**
@@ -50,6 +50,6 @@ class Pago extends Model
 
     public function usuarios()
     {
-        return $this->belongsToMany(User::class)->using(UsuarioPago::class);
+        return $this->belongsToMany(User::class, 'usuario_pago', 'idPago', 'idUsuario')->using(UsuarioPago::class);
     }
 }

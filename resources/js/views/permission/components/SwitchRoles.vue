@@ -8,11 +8,11 @@
     </div>
     <div>
       <el-radio-group v-model="switchRoles" v-loading="loading">
+        <el-radio-button label="super_admin" />
+        <el-radio-button label="directivo" />
         <el-radio-button label="admin" />
-        <el-radio-button label="manager" />
-        <el-radio-button label="editor" />
-        <el-radio-button label="user" />
-        <el-radio-button label="visitor" />
+        <el-radio-button label="socio" />
+        <el-radio-button label="inquilino" />
       </el-radio-group>
     </div>
   </div>

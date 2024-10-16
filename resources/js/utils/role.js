@@ -16,7 +16,7 @@ export default function checkRole(value) {
 
     return hasRole;
   } else {
-    console.error(`Need roles! Like v-role="['admin','editor']"`);
+    console.error(`Need roles! Like v-role="['super_admin','editor']"`);
     return false;
   }
 }

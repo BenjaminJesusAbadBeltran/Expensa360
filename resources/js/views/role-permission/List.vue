@@ -21,7 +21,7 @@
 
       <el-table-column v-if="checkPermission(['manage permission'])" align="center" label="Actions" width="200">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.name !== 'admin'" v-permission="['manage permission']" type="primary" size="small" icon="el-icon-edit" @click="handleEditPermissions(scope.row.id);">
+          <el-button v-if="scope.row.name !== 'super_admin'" v-permission="['manage permission']" type="primary" size="small" icon="el-icon-edit" @click="handleEditPermissions(scope.row.id);">
             {{ $t('permission.editPermission') }}
           </el-button>
         </template>

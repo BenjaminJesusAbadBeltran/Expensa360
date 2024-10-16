@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        $admin = User::create([
+        $superAdmin = User::create([
             'nombre' => 'Admin',
             'apellidoPaterno' => 'Admin',
             'apellidoMaterno' => 'Admin',
@@ -23,53 +23,53 @@ class DatabaseSeeder extends Seeder
             'idStatus' => 1,
             'password' => Hash::make('laravue'),
         ]);
-        $manager = User::create([
-            'nombre' => 'Manager',
-            'apellidoPaterno' => 'Manager',
-            'apellidoMaterno' => 'Manager',
-            'email' => 'manager@laravue.dev',
+        $directivo = User::create([
+            'nombre' => 'Directivo',
+            'apellidoPaterno' => 'Directivo',
+            'apellidoMaterno' => 'Directivo',
+            'email' => 'directivo@laravue.dev',
             'telefono' => '1234567890',
             'idStatus' => 1,
             'password' => Hash::make('laravue'),
         ]);
-        $editor = User::create([
-            'nombre' => 'Editor',
-            'apellidoPaterno' => 'Editor',
-            'apellidoMaterno' => 'Editor',
-            'email' => 'editor@laravue.dev',
+        $admin = User::create([
+            'nombre' => 'Administrador',
+            'apellidoPaterno' => 'Administrador',
+            'apellidoMaterno' => 'Administrador',
+            'email' => 'administrador@laravue.dev',
             'telefono' => '1234567890',
             'idStatus' => 1,
             'password' => Hash::make('laravue'),
         ]);
-        $user = User::create([
-            'nombre' => 'User',
-            'apellidoPaterno' => 'User',
-            'apellidoMaterno' => 'User',
-            'email' => 'user@laravue.dev',
+        $socio = User::create([
+            'nombre' => 'Socio',
+            'apellidoPaterno' => 'Socio',
+            'apellidoMaterno' => 'Socio',
+            'email' => 'Socio@laravue.dev',
             'telefono' => '1234567890',
             'idStatus' => 1,
             'password' => Hash::make('laravue'),
         ]);
-        $visitor = User::create([
-            'nombre' => 'Visitor',
-            'apellidoPaterno' => 'Visitor',
-            'apellidoMaterno' => 'Visitor',
-            'email' => 'visitor@laravue.dev',
+        $inquilino = User::create([
+            'nombre' => 'Inquilino',
+            'apellidoPaterno' => 'Inquilino',
+            'apellidoMaterno' => 'Inquilino',
+            'email' => 'Inquilino@laravue.dev',
             'telefono' => '1234567890',
             'idStatus' => 1,
             'password' => Hash::make('laravue'),
         ]);
 
+        $superAdminRole = Role::findByName(\App\Laravue\Acl::ROLE_SUPER_ADMIN);
+        $directivoRole = Role::findByName(\App\Laravue\Acl::ROLE_DIRECTIVO);
         $adminRole = Role::findByName(\App\Laravue\Acl::ROLE_ADMIN);
-        $managerRole = Role::findByName(\App\Laravue\Acl::ROLE_MANAGER);
-        $editorRole = Role::findByName(\App\Laravue\Acl::ROLE_EDITOR);
-        $userRole = Role::findByName(\App\Laravue\Acl::ROLE_USER);
-        $visitorRole = Role::findByName(\App\Laravue\Acl::ROLE_VISITOR);
+        $socioRole = Role::findByName(\App\Laravue\Acl::ROLE_SOCIO);
+        $inquilinoRole = Role::findByName(\App\Laravue\Acl::ROLE_INQUILINO);
+        $superAdmin->syncRoles($superAdminRole);
+        $directivo->syncRoles($directivoRole);
         $admin->syncRoles($adminRole);
-        $manager->syncRoles($managerRole);
-        $editor->syncRoles($editorRole);
-        $user->syncRoles($userRole);
-        $visitor->syncRoles($visitorRole);
+        $socio->syncRoles($socioRole);
+        $inquilino->syncRoles($inquilinoRole);
         $this->call(UsersTableSeeder::class);
     }
 }

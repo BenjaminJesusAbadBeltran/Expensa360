@@ -15,18 +15,21 @@ class CreatePagosTable extends Migration
     {
         Schema::create('pagos', function (Blueprint $table) {
             $table->id('idPago');
+            $table->unsignedBigInteger('idUsuario');
+            $table->foreign('idUsuario')->references('idUsuario')->on('users');
+            $table->unsignedBigInteger('idPropiedad');
+            $table->foreign('idPropiedad')->references('idPropiedad')->on('propiedades');
             $table->unsignedBigInteger('idMetodoPago');
-            $table->unsignedBigInteger('idCajaChica');
-            $table->decimal('monto', 8, 2);
-            $table->date('fechaPago');
-            $table->integer('idStatus');
-            $table->timestamps();
-
             $table->foreign('idMetodoPago')->references('idMetodo')->on('metodos_pago');
-            $table->foreign('idCajaChica')->references('idCajaChica')->on('caja_chica');
+            $table->decimal('montoTotal', 8, 2);
+            $table->timestamp('fechaPago')->format('Y-m-d H:i');
+            $table->string('observaciones');
+            $table->enum('status', ['Activo', 'Borrado'])->default('Activo');
+            $table->timestamps();
+            
         });
-    }
 
+    }
     /**
      * Reverse the migrations.
      *

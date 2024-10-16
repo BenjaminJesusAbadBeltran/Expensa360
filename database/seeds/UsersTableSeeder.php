@@ -16,20 +16,21 @@ class UsersTableSeeder extends Seeder
     public function run()
     {
         $userList = [
-            "Adriana C. Ocampo Uria",
-            "Albert Einstein",
-            "Anna K. Behrensmeyer",
-            "Blaise Pascal",
-            "Caroline Herschel",
+            "Benjamin J. Beltran",
+            "Marisol Arguedas",
+            "Rodolfo Rodriguez",
+            "Blaise X. Pascal",
+            "Caroline XX. Herschel",
         ];
 
         foreach (array_slice($userList, 0, 5) as $fullName) {
             $name = str_replace(' ', '.', $fullName);
             $roleName = \Illuminate\Support\Arr::random([
-                Acl::ROLE_MANAGER,
-                Acl::ROLE_EDITOR,
-                Acl::ROLE_USER,
-                Acl::ROLE_VISITOR,
+                Acl::ROLE_SUPER_ADMIN,
+                Acl::ROLE_DIRECTIVO,
+                Acl::ROLE_ADMIN,
+                Acl::ROLE_SOCIO,
+                Acl::ROLE_INQUILINO
             ]);
             $user = User::create([
                 'nombre' => explode(' ', $fullName)[0],

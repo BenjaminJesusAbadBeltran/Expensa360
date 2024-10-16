@@ -20,26 +20,22 @@ class SetupRolePermissions extends Migration
             Role::findOrCreate($role);
         }
 
+        $superAdminRole = Role::findByName(Acl::ROLE_SUPER_ADMIN);
+        $directivoRole = Role::findByName(Acl::ROLE_DIRECTIVO);
         $adminRole = Role::findByName(Acl::ROLE_ADMIN);
-        $managerRole = Role::findByName(Acl::ROLE_MANAGER);
-        $editorRole = Role::findByName(Acl::ROLE_EDITOR);
-        $userRole = Role::findByName(Acl::ROLE_USER);
-        $visitorRole = Role::findByName(Acl::ROLE_VISITOR);
+        $socioRole = Role::findByName(Acl::ROLE_SOCIO);
+        $inquilinoRole = Role::findByName(Acl::ROLE_INQUILINO);
 
         foreach (Acl::permissions() as $permission) {
             Permission::findOrCreate($permission, 'api');
         }
 
         // Setup basic permission
-        $adminRole->givePermissionTo(Acl::permissions());
-        $managerRole->givePermissionTo(Acl::permissions([Acl::PERMISSION_PERMISSION_MANAGE]));
-        $editorRole->givePermissionTo(Acl::menuPermissions());
-        $editorRole->givePermissionTo(Acl::PERMISSION_ARTICLE_MANAGE);
-        $userRole->givePermissionTo([
-            Acl::PERMISSION_VIEW_MENU_ELEMENT_UI,
-            Acl::PERMISSION_VIEW_MENU_PERMISSION,
-        ]);
-        $visitorRole->givePermissionTo([
+        $superAdminRole->givePermissionTo(Acl::permissions());
+        $directivoRole->givePermissionTo(Acl::permissions([Acl::PERMISSION_PERMISSION_MANAGE]));
+        $adminRole->givePermissionTo(Acl::menuPermissions());
+        $socioRole->givePermissionTo(Acl::PERMISSION_ARTICLE_MANAGE);
+        $inquilinoRole->givePermissionTo([
             Acl::PERMISSION_VIEW_MENU_ELEMENT_UI,
             Acl::PERMISSION_VIEW_MENU_PERMISSION,
         ]);

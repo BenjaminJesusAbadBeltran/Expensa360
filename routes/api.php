@@ -19,6 +19,7 @@ use App\Laravue\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Api\GoogleAuthController;
+use App\Http\Controllers\Api\PronosticoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -103,6 +104,9 @@ Route::namespace('Api')->group(function() {
         Route::apiResource('egresos', 'EgresoController')->middleware('permission:' . Acl::PERMISSION_OUTFLOW_MANAGE);
         Route::apiResource('pagos', 'PagoController')->middleware('permission:' . Acl::PERMISSION_PAYMENT_MANAGE);
         Route::apiResource('reportes', 'ReporteController')->middleware('permission:' . Acl::PERMISSION_REPORT_MANAGE);
+        
+        //Modelo de Analisis de Ingresos
+        Route::get('/pronostico-ingresos', [PronosticoController::class, 'pronosticoIngresos']);
         
     });
 });

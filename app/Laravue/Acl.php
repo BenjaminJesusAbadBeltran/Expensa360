@@ -18,11 +18,11 @@ use Illuminate\Support\Str;
  */
 final class Acl
 {
+    const ROLE_SUPER_ADMIN = 'super_admin';
+    const ROLE_DIRECTIVO = 'directivo';
     const ROLE_ADMIN = 'admin';
-    const ROLE_MANAGER = 'manager';
-    const ROLE_EDITOR = 'editor';
-    const ROLE_USER = 'user';
-    const ROLE_VISITOR = 'visitor';
+    const ROLE_SOCIO = 'socio';
+    const ROLE_INQUILINO = 'inquilino';
 
     const PERMISSION_VIEW_MENU_ELEMENT_UI = 'view menu element ui';
     const PERMISSION_VIEW_MENU_PERMISSION = 'view menu permission';

@@ -193,11 +193,11 @@ export default {
   },
   roles: {
     description: {
-      admin: 'Superadministrador. Tiene acceso y permiso completo a todas las páginas.',
-      manager: 'Administrador. Tiene acceso y permiso a la mayoría de las páginas excepto la página de permisos.',
-      editor: 'Editor. Tiene acceso a la mayoría de las páginas, permiso completo con artículos y recursos relacionados.',
-      user: 'Usuario normal. Tiene acceso a algunas páginas',
-      visitor: 'Visitante. Tiene acceso a páginas estáticas, no debe tener permisos de escritura',
+      super_admin: 'Superadministrador. Tiene acceso y permiso completo a todas las páginas.',
+      directivo: 'Administrador. Tiene acceso y permiso a la mayoría de las páginas excepto la página de permisos.',
+      admin: 'Administrador. Tiene acceso y permiso a la mayoría de las páginas excepto la página de permisos.',
+      socio: 'Usuario normal. Tiene acceso a algunas páginas',
+      inquilino: 'Visitante. Tiene acceso a páginas estáticas, no debe tener permisos de escritura',
     },
   },
 };

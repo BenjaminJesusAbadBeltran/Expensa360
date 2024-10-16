@@ -17,9 +17,13 @@ class CreateExpensasTable extends Migration
             $table->id('idExpensa');
             $table->unsignedBigInteger('idPropiedad');
             $table->foreign('idPropiedad')->references('idPropiedad')->on('propiedades');
-            $table->decimal('montoPagar', 8, 2)->default(0);
-            $table->date('fechaVencimiento');
-            $table->integer('idStatus');
+            $table->decimal('monto', 8, 2)->default(0);
+            $table->decimal('montoPagado', 8, 2)->default(0);
+            $table->decimal('montoPendiente', 8, 2)->default(0);
+            $table->decimal('montoAhorro', 8, 2)->default(0);
+            $table->date('mes');
+            $table->enum('estado', ['Pendiente', 'Pagado'])->default('Pendiente');
+            $table->enum('status', ['Activo', 'Borrado'])->default('Activo');
             $table->timestamps();
         });
     }
