@@ -10,6 +10,9 @@
         @click="handleCreate">
         {{ $t('table.add') }}
       </el-button>
+      <el-checkbox v-model="filterStatus" @change="filterByStatus" class="filter-item" style="margin-left: 10px;">
+        Pagos Eliminados
+      </el-checkbox>
     </div>
 
     <el-table v-loading="loading" :data="list" border fit highlight-current-row style="width: 100%">
@@ -18,17 +21,38 @@
           {{ scope.row.idCajaChica }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="Total">
+      <el-table-column align="center" label="Saldo Inicial">
         <template slot-scope="scope">
-          {{ scope.row.total }}
+          {{ scope.row.saldoInicial }}
         </template>
       </el-table-column>
-
-      <el-table-column align="center" label="Actions" width="350">
+      <el-table-column align="center" label="Saldo Actual">
+        <template slot-scope="scope">
+          {{ scope.row.saldoActual }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="Saldo Final">
+        <template slot-scope="scope">
+          {{ scope.row.saldoFinal }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="Fecha Inicial">
+        <template slot-scope="scope">
+          {{ scope.row.fecha_Inicial }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="Fecha Final">
+        <template slot-scope="scope">
+          {{ scope.row.fecha_Final }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="Actions" width="200">
         <template slot-scope="scope">
           <el-button size="mini" type="primary" @click="handleUpdate(scope.row.idCajaChica)">Edit</el-button>
-          <el-button size="mini" type="danger"
-            @click="handleDelete(scope.row.idCajaChica, scope.row.total)">Delete</el-button>
+          <el-button v-show="scope.row.status == 'Borrado'" size="mini" type="success"
+            @click="handleRestore(scope.row)">Restore</el-button>
+          <el-button v-show="scope.row.status !== 'Borrado'" size="mini" type="danger"
+            @click="handleDelete(scope.row.idCajaChica)">Delete</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -37,16 +61,27 @@
       @pagination="getList" />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="cajaChicaForm" :rules="rules" :model="newCajaChica" label-position="left" label-width="70px"
+      <el-form ref="cajaChicaForm" :rules="rules" :model="newCajaChica" label-position="left" label-width="120px"
         style="width: 400px; margin-left:50px;">
-        <el-form-item :label="$t('Total')" prop="total">
-          <el-input v-model="newCajaChica.total"></el-input>
+        <el-form-item :label="$t('Saldo Inicial')" prop="saldoInicial">
+          <el-input v-model="newCajaChica.saldoInicial"></el-input>
+        </el-form-item>
+        <el-form-item :label="$t('Saldo Actual')" prop="saldoActual">
+          <el-input v-model="newCajaChica.saldoActual"></el-input>
+        </el-form-item>
+        <el-form-item :label="$t('Saldo Final')" prop="saldoFinal">
+          <el-input v-model="newCajaChica.saldoFinal"></el-input>
+        </el-form-item>
+        <el-form-item :label="$t('Fecha Inicial')" prop="fecha_Inicial">
+          <el-date-picker v-model="newCajaChica.fecha_Inicial" type='date' placeholder="Select date"></el-date-picker>
+        </el-form-item>
+        <el-form-item :label="$t('Fecha Final')" prop="fecha_Final">
+          <el-date-picker v-model="newCajaChica.fecha_Final" type='date' placeholder="Select date"></el-date-picker>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">Cancel</el-button>
-        <el-button type="primary" @click="createOrUpdateCajaChica">{{ dialogStatus === 'create' ? 'Create' : 'Update'
-          }}</el-button>
+        <el-button type="primary" @click="dialogStatus === 'create' ? createData() : updateData()">Confirmar</el-button>
       </div>
     </el-dialog>
   </div>
@@ -65,7 +100,7 @@ export default {
   directives: { waves },
   data() {
     return {
-      list: null,
+      filterStatus: false,
       total: 0,
       loading: true,
       query: {
@@ -73,15 +108,28 @@ export default {
         page: 1,
         limit: 15,
       },
-      newCajaChica: {},
+      newCajaChica: {
+        saldoInicial: '',
+        saldoActual: '',
+        saldoFinal: '',
+        fecha_Inicial: '',
+        fecha_Final: '',
+        status: 'Activo',
+      },
       dialogFormVisible: false,
       dialogStatus: '',
+      list: [],
       textMap: {
         create: 'Create',
         update: 'Update',
       },
+      total: 0,
+      formLabelWidth: '150px',
       rules: {
-        total: [{ required: true, message: 'Total is required', trigger: 'blur' }],
+        saldoInicial: [{ required: true, message: 'Saldo Inicial is required', trigger: 'blur' }],
+        saldoActual: [{ required: true, message: 'Saldo Actual is required', trigger: 'blur' }],
+        saldoFinal: [{ required: true, message: 'Saldo Final is required', trigger: 'blur' }],
+        fecha_Inicial: [{ required: true, message: 'Fecha Inicial is required', trigger: 'blur' }],
       },
     };
   },
@@ -101,24 +149,65 @@ export default {
       this.query.page = 1;
       this.getList();
     },
+    filterByStatus() {
+      this.query.status = this.filterStatus ? 'Borrado' : null;
+      this.getList();
+    },
     handleCreate() {
       this.resetNewCajaChica();
       this.dialogStatus = 'create';
       this.dialogFormVisible = true;
+      this.dialogTitle = this.textMap.create;
       this.$nextTick(() => {
         this.$refs['cajaChicaForm'].clearValidate();
       });
     },
-    createOrUpdateCajaChica() {
+    async createData() {
       this.$refs['cajaChicaForm'].validate(async (valid) => {
         if (valid) {
-          if (this.dialogStatus === 'create') {
-            await cajaChicaResource.store(this.newCajaChica);
-          } else {
-            await cajaChicaResource.update(this.newCajaChica.idCajaChica, this.newCajaChica);
-          }
+          this.loading = true;
+          // Formatear las fechas antes de enviarlas al backend
+          const formattedCajaChica = {
+            ...this.newCajaChica,
+            fecha_Inicial: new Date(this.newCajaChica.fecha_Inicial).toISOString().split('T')[0],
+            fecha_Final: new Date(this.newCajaChica.fecha_Final).toISOString().split('T')[0],
+          };
+          cajaChicaResource
+            .store(formattedCajaChica)
+            .then(response => {
+              this.$message({
+                message: 'New Caja Chica has been created successfully.',
+                type: 'success',
+                duration: 5 * 1000,
+              });
+              this.resetNewCajaChica();
+              this.dialogFormVisible = false;
+              this.handleFilter();
+            })
+            .catch(error => {
+              this.$message.error('An error occurred while saving data');
+            })
+            .finally(() => {
+              this.loading = false;
+            });
+        } else {
+          this.$message.error('Failed to create data');
+          return;
+        }
+      });
+    },
+    async updateData() {
+      this.$refs['cajaChicaForm'].validate(async (valid) => {
+        if (valid) {
+          // Formatear las fechas antes de enviarlas al backend
+          const formattedCajaChica = {
+            ...this.newCajaChica,
+            fecha_Inicial: new Date(this.newCajaChica.fecha_Inicial).toISOString().split('T')[0],
+            fecha_Final: new Date(this.newCajaChica.fecha_Final).toISOString().split('T')[0],
+          };
+          await cajaChicaResource.update(this.newCajaChica.idCajaChica, formattedCajaChica);
           this.dialogFormVisible = false;
-          this.getList();  
+          this.getList();
         }
       });
     },
@@ -145,38 +234,46 @@ export default {
         console.error('Error al obtener datos:', error);
       }
     },
-    async handleDelete(id, total) {
-      this.$confirm('This will permanently delete the caja chica with total ' + total + '. Continue?', 'Warning', {
+    async handleDelete(idCajaChica) {
+      this.$confirm('This will permanently delete the caja chica. Continue?', 'Warning', {
         confirmButtonText: 'OK',
         cancelButtonText: 'Cancel',
         type: 'warning',
       }).then(async () => {
         try {
-          const response = await cajaChicaResource.destroy(id);
-          if (response && response.message) {
-            this.$message({
-              message: 'CajaChica deleted successfully',
-              type: 'success',
-            });
-
-            // Eliminar el registro de la lista localmente
-            this.list = this.list.filter(item => item.id !== id);
-
-            // Actualizar la lista de caja chica
-            this.getList();
-          } else {
-            this.$message.error('Failed to delete data');
-            console.error('No message found in response:', response);
-          }
+          await cajaChicaResource.destroy(idCajaChica);
+          this.getList(); 
         } catch (error) {
           this.$message.error('An error occurred while deleting data');
-          console.error('Error al eliminar datos:', error);
         }
+      });
+    },
+    async handleRestore(cajaChica) {
+      this.$confirm(`Esta seguro de restaurar ${cajaChica.saldoActual}?`, 'Warning', {
+        confirmButtonText: 'OK',
+        cancelButtonText: 'Cancel',
+        type: 'warning',
+      }).then(async () => {
+        try {
+          const updatedExpensa = { ...cajaChica, status: 'Activo' };
+          await cajaChicaResource.update(cajaChica.idCajaChica, updatedExpensa);
+          this.getList();
+        } catch (error) {
+          this.$message.error('An error occurred while recovering data');
+        }
+      }).catch(() => {
+        this.$message.info('Restore cancelled');
       });
     },
     resetNewCajaChica() {
       this.newCajaChica = {
-        total: '',
+        idCajaChica:null,
+        saldoInicial: '',
+        saldoActual: '',
+        saldoFinal: '',
+        fecha_Inicial: '',
+        fecha_Final: '',
+        status: '',
       };
     },
   },
@@ -215,4 +312,4 @@ export default {
     clear: left;
   }
 }
-</style></template>
+</style>

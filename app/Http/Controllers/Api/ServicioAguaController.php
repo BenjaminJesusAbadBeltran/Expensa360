@@ -20,15 +20,29 @@ class ServicioAguaController extends BaseController
     public function index(Request $request)
     {
         $searchParams = $request->all();
-        $servicioAguaQuery = ServicioAgua::where('idStatus', 1); // Filtrar por idStatus = 1
+        $servicioAguaQuery = ServicioAgua::with('propiedad');
         $limit = Arr::get($searchParams, 'limit', static::ITEM_PER_PAGE);
         $keyword = Arr::get($searchParams, 'keyword', '');
+        $status = Arr::get($searchParams, 'status', 'Activo'); // Default to 'Activo'
 
         if (!empty($keyword)) {
             $servicioAguaQuery->where('idServicioAgua', 'LIKE', '%' . $keyword . '%');
         }
 
-        return ServicioAguaResource::collection($servicioAguaQuery->paginate($limit));
+        if (!is_null($status)) {
+            $servicioAguaQuery->where('status', $status);
+        }
+
+        $servicios = $servicioAguaQuery->paginate($limit);
+
+    // Transformar los datos para incluir el nombre de la propiedad
+        $servicios->getCollection()->transform(function ($servicio) {
+            $servicio->nombrePropiedad = $servicio->propiedad ? $servicio->propiedad->nombre : 'N/A';
+            return $servicio;
+        });
+
+        return ServicioAguaResource::collection($servicios);    
+    
     }
 
     /**
@@ -40,12 +54,15 @@ class ServicioAguaController extends BaseController
     public function store(Request $request)
     {
         $validatedData = $request->validate([
+            'idPropiedad' => 'required|integer|exists:propiedades,idPropiedad',
             'montoPagar' => 'required|numeric',
             'fechaMedicion' => 'required|date',
             'medicion' => 'required|numeric',
             'previaMedicion' => 'required|numeric',
-            'idStatus' => 'required|integer',
+            'status' => 'required|string',
         ]);
+
+        $validatedData['status'] = $validatedData['status'] ?? 'Activo';
 
         $servicioAgua = ServicioAgua::create($validatedData);
         return new ServicioAguaResource($servicioAgua);
@@ -72,11 +89,12 @@ class ServicioAguaController extends BaseController
     public function update(Request $request, ServicioAgua $servicioAgua)
     {
         $validatedData = $request->validate([
+            'idPropiedad' => 'required|integer|exists:propiedades,idPropiedad',
             'montoPagar' => 'required|numeric',
             'fechaMedicion' => 'required|date',
             'medicion' => 'required|numeric',
             'previaMedicion' => 'required|numeric',
-            'idStatus' => 'required|integer',
+            'status' => 'required|string',
         ]);
 
         $servicioAgua->update($validatedData);
@@ -91,8 +109,8 @@ class ServicioAguaController extends BaseController
      */
     public function destroy(ServicioAgua $servicioAgua)
     {
-        // Cambiar el idStatus a 0
-        $servicioAgua->idStatus = 0;
+        // Cambia el status a 0
+        $servicioAgua->status = 'Borrado';
         $servicioAgua->save();
 
         return response()->json(['message' => 'ServicioAgua updated to idStatus 0'], 200);

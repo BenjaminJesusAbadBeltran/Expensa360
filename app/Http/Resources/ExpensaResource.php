@@ -17,11 +17,14 @@ class ExpensaResource extends JsonResource
         return [
             'idExpensa' => $this->idExpensa,
             'idPropiedad' => $this->idPropiedad,
-            'montoPagar' => number_format((float)$this->montoPagar, 2, '.', ''),
-            'fechaVencimiento' => $this->fechaVencimiento->format('d-m-Y'),
-            'idStatus' => $this->idStatus,
+            'monto' => number_format((float)$this->monto, 2, '.', ''),
+            'montoPagado' => number_format((float)$this->montoPagado, 2, '.', ''),
+            'montoPendiente' => number_format((float)$this->montoPendiente, 2, '.', ''),
+            'montoAhorro' => number_format((float)$this->montoAhorro, 2, '.', ''),
+            'mes' => $this->mes,
+            'estado' => $this->estado,
+            'status' => $this->status,
             'propiedad' => new PropiedadResource($this->whenLoaded('propiedad')),
-            'usuarios' => UserResource::collection($this->whenLoaded('usuarios')), // Asegúrate de formatear correctamente los datos de los usuarios
         ];
     }
 }

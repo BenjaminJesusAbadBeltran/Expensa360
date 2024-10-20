@@ -6,6 +6,7 @@ use App\Laravue\Models\Egreso;
 use Illuminate\Http\Request;
 use App\Http\Resources\EgresoResource;
 use Illuminate\Support\Arr;
+use Carbon\Carbon;
 
 class EgresoController extends BaseController
 {
@@ -20,12 +21,17 @@ class EgresoController extends BaseController
     public function index(Request $request)
     {
         $searchParams = $request->all();
-        $egresoQuery = Egreso::where('idStatus', 1); // Filtrar por idStatus = 1
+        $egresoQuery = Egreso::query(); // Filtrar por status = Activo
         $limit = Arr::get($searchParams, 'limit', static::ITEM_PER_PAGE);
         $keyword = Arr::get($searchParams, 'keyword', '');
+        $status = Arr::get($searchParams, 'status', 'Activo'); // Default to 'Activo'
 
         if (!empty($keyword)) {
             $egresoQuery->where('idEgreso', 'LIKE', '%' . $keyword . '%');
+        }
+
+        if (!is_null($status)) {
+            $egresoQuery->where('status', $status);
         }
 
         return EgresoResource::collection($egresoQuery->paginate($limit));
@@ -38,16 +44,21 @@ class EgresoController extends BaseController
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {
-        $validatedData = $request->validate([
-            'idCajaChica' => 'required|integer',
-            'monto' => 'required|numeric',
-            'idStatus' => 'required|integer',
-        ]);
+{
+    $validatedData = $request->validate([
+        'idCajaChica' => 'required|integer',
+        'concepto' => 'required|string',
+        'monto' => 'required|numeric',
+        'fechaEgreso' => 'required|date',
+        'status' => 'required|string',
+    ]);
 
-        $egreso = Egreso::create($validatedData);
-        return new EgresoResource($egreso);
-    }
+    // Convert fechaEgreso to the correct format
+    $validatedData['fechaEgreso'] = Carbon::parse($validatedData['fechaEgreso'])->format('Y-m-d');
+
+    $egreso = Egreso::create($validatedData);
+    return new EgresoResource($egreso);
+}
 
     /**
      * Display the specified resource.
@@ -68,16 +79,21 @@ class EgresoController extends BaseController
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, Egreso $egreso)
-    {
-        $validatedData = $request->validate([
-            'idCajaChica' => 'required|integer',
-            'monto' => 'required|numeric',
-            'idStatus' => 'required|integer',
-        ]);
+{
+    $validatedData = $request->validate([
+        'idCajaChica' => 'required|integer',
+        'concepto' => 'required|string',
+        'monto' => 'required|numeric',
+        'fechaEgreso' => 'required|date',
+        'status' => 'required|string',
+    ]);
 
-        $egreso->update($validatedData);
-        return new EgresoResource($egreso);
-    }
+    // Convert fechaEgreso to the correct format
+    $validatedData['fechaEgreso'] = Carbon::parse($validatedData['fechaEgreso'])->format('Y-m-d');
+
+    $egreso->update($validatedData);
+    return new EgresoResource($egreso);
+}
 
     /**
      * Remove the specified resource from storage.
@@ -89,7 +105,7 @@ class EgresoController extends BaseController
     {
 
         // Cambiar el idStatus a 0
-        $egreso->idStatus = 0;
+        $egreso->status = 'Borrado';
         $egreso->save();
 
         return response()->json(['message' => 'Egreso updated to idStatus 0'], 200);

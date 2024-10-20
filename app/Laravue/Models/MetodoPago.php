@@ -17,7 +17,7 @@ class MetodoPago extends Model
         'nombre',
         'cuenta',
         'imagen',
-        'idStatus',
+        'status',
     ];
 
 }

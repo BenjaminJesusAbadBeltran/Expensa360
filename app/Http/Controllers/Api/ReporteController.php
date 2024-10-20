@@ -6,6 +6,8 @@ use App\Laravue\Models\Reporte;
 use Illuminate\Http\Request;
 use App\Http\Resources\ReporteResource;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
+
 
 class ReporteController extends BaseController
 {
@@ -95,4 +97,36 @@ class ReporteController extends BaseController
 
         return response()->json(['message' => 'Reporte updated to idStatus 0'], 200);
     }
+
+
+
+public function generateReport(Request $request)
+{
+    $validatedData = $request->validate([
+        'table' => 'required|string',
+        'attributes' => 'required|array',
+        'attributes.*' => 'string',
+        'dateFrom' => 'nullable|date',
+        'dateTo' => 'nullable|date',
+    ]);
+
+    $table = $validatedData['table'];
+    $attributes = $validatedData['attributes'];
+    $dateFrom = $validatedData['dateFrom'];
+    $dateTo = $validatedData['dateTo'];
+
+    $query = DB::table($table)->select($attributes);
+
+    if ($dateFrom) {
+        $query->whereDate('created_at', '>=', $dateFrom);
+    }
+
+    if ($dateTo) {
+        $query->whereDate('created_at', '<=', $dateTo);
+    }
+
+    $data = $query->get();
+
+    return response()->json($data);
+}
 }

@@ -15,8 +15,10 @@ class Egreso extends Model
 
     protected $fillable = [
         'idCajaChica',
+        'concepto',
         'monto',
-        'idStatus',
+        'fechaEgreso',
+        'status',
     ];
 
     public function cajaChica()

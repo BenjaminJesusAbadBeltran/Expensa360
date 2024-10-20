@@ -16,7 +16,12 @@ class CajaChicaResource extends JsonResource
     {
         return [
             'idCajaChica' => $this->idCajaChica,
-            'total' => $this->total,
+            'saldoInicial' => $this->saldoInicial,
+            'saldoActual' => $this->saldoActual,
+            'saldoFinal' => $this->saldoFinal,
+            'fecha_Inicial' => $this->fecha_Inicial,
+            'fecha_Final' => $this->fecha_Final,
+            'status' => $this->status,
             // 'created_at' => $this->created_at,
             // 'updated_at' => $this->updated_at,
         ];

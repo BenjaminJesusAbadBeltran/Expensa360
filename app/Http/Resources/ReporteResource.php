@@ -19,7 +19,7 @@ class ReporteResource extends JsonResource
             'idGenerador' => $this->idGenerador,
             'tipo_reporte' => $this->tipo_reporte,
             'datos_generados' => $this->datos_generados,
-            'idStatus' => $this->idStatus,
+            'status' => $this->status,
             'generador' => new UserResource($this->whenLoaded('generador')),
         ];
     }

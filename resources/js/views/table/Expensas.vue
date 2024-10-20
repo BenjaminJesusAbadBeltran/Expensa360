@@ -6,7 +6,7 @@
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         {{ $t('table.search') }}
       </el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-plus"
+      <el-button class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-plus"
         @click="handleCreate">
         {{ $t('table.add') }}
       </el-button>
@@ -19,27 +19,22 @@
       <el-table v-loading="loading" :data="list" border fit highlight-current-row style="width: 100%">
         <el-table-column prop="idExpensa" label="ID" width="80" />
         <el-table-column prop="nombrePropiedad" label="Nombre de Propiedad" />
-        <el-table-column prop="montoPagar" label="Monto a Pagar" />
-        <el-table-column prop="fechaVencimiento" label="Fecha de Vencimiento" />
+        <el-table-column prop="monto" label="Monto" />
+        <el-table-column label="Mes">
+        <template slot-scope="scope">
+          {{ getMonthInLetters(scope.row.mes) }}
+        </template>
+      </el-table-column>
         <el-table-column label="Acciones" width="280">
           <template slot-scope="scope">
-            <el-button size="mini" type="primary" @click="handleEdit(scope.row.idExpensa)">Editar</el-button>
-            <el-button v-show="scope.row.idStatus == 0" size="mini" type="success"
-              @click="handleRestore(scope.row)">Restore</el-button>
-            <el-button v-show="scope.row.idStatus !== 0" size="mini" type="danger"
-              @click="handleDelete(scope.row.idExpensa, scope.row.montoPagar)">Eliminar</el-button>
-          </template>
+          <el-button v-show="scope.row.status !== 'Borrado'" size="mini" type="warning" @click="handleUpdate(scope.row.idExpensa)">Editar</el-button>
+          <el-button v-show="scope.row.status == 'Borrado'" size="mini" type="success"
+            @click="handleRestore(scope.row)">Restore
+          </el-button>
+          <el-button v-show="scope.row.status !== 'Borrado'" size="mini" type="danger"
+            @click="handleDelete(scope.row.idExpensa, scope.row.monto)">Eliminar</el-button>
+        </template>
         </el-table-column>
-        <el-table-column label="Usuarios Asignados">
-  <template slot-scope="scope">
-    <span v-if="scope.row.usuarios && scope.row.usuarios.length">
-      <span v-for="(user, index) in scope.row.usuarios" :key="user.idUsuario">
-        {{ user.nombre }}<span v-if="index < scope.row.usuarios.length - 1">, </span>
-      </span>
-    </span>
-    <span v-else>No asignado</span>
-  </template>
-</el-table-column>
       </el-table>
     </template>
 
@@ -49,26 +44,17 @@
     <el-dialog :visible.sync="dialogFormVisible" :title="dialogTitle">
       <div v-loading="loading" class="form-container">
         <el-form :model="newExpensa" ref="expensaForm" :rules="rules">
-          <<el-form-item label="Propiedad" :label-width="formLabelWidth" prop="idPropiedad">
+          <el-form-item label="Propiedad" :label-width="formLabelWidth" prop="idPropiedad">
             <el-select v-model="newExpensa.idPropiedad" placeholder="Seleccione una propiedad">
-              <el-option
-                v-for="property in properties"
-                :key="property.idPropiedad"
-                :label="property.nombre"
-                :value="property.idPropiedad"
-              />
+              <el-option v-for="property in properties" :key="property.idPropiedad" :label="property.nombre"
+                :value="property.idPropiedad" />
             </el-select>
           </el-form-item>
-          <el-form-item label="Expensa" :label-width="formLabelWidth" prop="montoPagar">
-            <el-input v-model="newExpensa.montoPagar" />
+          <el-form-item label="Expensa" :label-width="formLabelWidth" prop="monto">
+            <el-input v-model="newExpensa.monto" />
           </el-form-item>
-          <el-form-item label="Vencimiento" :label-width="formLabelWidth" prop="fechaVencimiento">
-            <el-date-picker v-model="newExpensa.fechaVencimiento" type="date" placeholder="Elija una fecha" />
-          </el-form-item>
-          <el-form-item label="Usuarios" :label-width="formLabelWidth" prop="usuarios">
-            <el-select v-model="newExpensa.usuarios" multiple placeholder="Seleccione usuarios">
-              <el-option v-for="user in users" :key="user.idUsuario" :label="user.nombre" :value="user.idUsuario"></el-option>
-            </el-select>
+          <el-form-item label="Mes" :label-width="formLabelWidth" prop="mes">
+            <el-date-picker v-model="newExpensa.mes" type="month" placeholder="Seleccione el mes" />
           </el-form-item>
         </el-form>
 
@@ -85,10 +71,8 @@
 import Pagination from '@/components/Pagination';
 import ExpensaResource from '@/api/expensas';
 import PropertyResource from '@/api/propiedades';
-import UserResource from '@/api/user';
 import waves from '@/directive/waves';
 
-const userResource = new UserResource();
 const propertyResource = new PropertyResource();
 const expensaResource = new ExpensaResource();
 
@@ -98,7 +82,6 @@ export default {
   directives: { waves },
   data() {
     return {
-      users: [], // Definir users
       filterStatus: false,
       list: null,
       total: 0,
@@ -113,17 +96,13 @@ export default {
       },
       newExpensa: {
         idPropiedad: '',
-        montoPagar: '',
-        fechaVencimiento: '',
-        idStatus: 1,
-        usuarios: [], // Definir la propiedad usuarios dentro de newExpensa
+        monto: '',
+        mes: '',
+        status: 'Activo',
       },
       properties: [],
       rules: {
         idPropiedad: [{ required: true, message: 'The property ID field is required.', trigger: 'blur' }],
-        montoPagar: [{ required: true, message: 'The amount to pay field is required.', trigger: 'blur' }],
-        fechaVencimiento: [{ required: true, message: 'The due date field is required.', trigger: 'blur' }],
-        idStatus: [{ required: true, message: 'The status field is required.', trigger: 'blur' }],
       },
       formLabelWidth: '120px',
       textMap: {
@@ -136,7 +115,6 @@ export default {
     this.resetNewExpensa();
     this.getList();
     this.getProperties();
-    this.getUsers(); // Llamar a getUsers
   },
   mounted() {
     this.getList();
@@ -167,16 +145,13 @@ export default {
         this.$message.error('An error occurred while fetching properties');
       }
     },
-    async getUsers() {
-      try {
-        const response = await userResource.list(); // Llamar a la API para obtener todos los usuarios
-        this.users = response.data;
-      } catch (error) {
-        this.$message.error('An error occurred while fetching users');
-      }
+    getMonthInLetters(dateString) {
+      const date = new Date(dateString);
+      const options = { month: 'long' };
+      return date.toLocaleDateString('es-ES', options);
     },
     filterByStatus() {
-      this.query.idStatus = this.filterStatus ? 0 : null;
+      this.query.status = this.filterStatus ? 'Borrado' : null;
       this.getList();
     },
     handleFilter() {
@@ -193,34 +168,27 @@ export default {
       });
     },
     async createData() {
-      this.$refs['expensaForm'].validate((valid) => {
+      this.$refs['expensaForm'].validate(async (valid) => {
         if (valid) {
           this.loading = true;
-          expensaResource
-            .store(this.newExpensa)
-            .then(() => {
-              this.$message({
-                message: 'New Expensa has been created successfully.',
-                type: 'success',
-                duration: 5 * 1000,
-              });
-              this.resetNewExpensa();
-              this.dialogFormVisible = false;
-              this.handleFilter();
-            })
-            .catch(error => {
-              console.log(error);
-            })
-            .finally(() => {
-              this.loading = false;
-            });
-        } else {
-          console.log('error submit!!');
-          return false;
+          // Formatear la fecha antes de enviarla al backend
+          const formattedExpensa = {
+            ...this.newExpensa,
+            mes: new Date(this.newExpensa.mes).toISOString().split('T')[0],
+          };
+          try {
+            await expensaResource.store(formattedExpensa);
+            this.dialogFormVisible = false;
+            this.getList();
+          } catch (error) {
+            console.error(error);
+          } finally {
+            this.loading = false;
+          }
         }
       });
     },
-    async handleEdit(idExpensa) {
+    async handleUpdate(idExpensa) {
       try {
         const response = await expensaResource.get(idExpensa);
         if (response && response.data) {
@@ -237,23 +205,36 @@ export default {
       }
     },
     updateData() {
-      this.$refs['expensaForm'].validate(async valid => {
+      this.$refs['expensaForm'].validate(async (valid) => {
         if (valid) {
-          expensaResource.update(this.newExpensa.idExpensa, this.newExpensa).then(() => {
+          this.loading = true;
+          // Formatear la fecha antes de enviarla al backend
+          const date = new Date(this.newExpensa.mes);
+          date.setDate(2); // Establecer el día al 02
+          const formattedExpensa = {
+            ...this.newExpensa,
+            mes: date.toISOString().split('T')[0], // Formato YYYY-MM-DD
+          };
+          try {
+            await expensaResource.update(this.newExpensa.idExpensa, formattedExpensa);
             this.dialogFormVisible = false;
             this.getList();
-          });
+          } catch (error) {
+            console.error(error);
+          } finally {
+            this.loading = false;
+          }
         }
       });
     },
-    async handleDelete(id, montoPagar) {
-      this.$confirm(`This will permanently delete Expensa ${montoPagar}. Continue?`, 'Warning', {
+    async handleDelete(idExpensa, monto) {
+      this.$confirm(`This will permanently delete Expensa ${monto}. Continue?`, 'Warning', {
         confirmButtonText: 'OK',
         cancelButtonText: 'Cancel',
         type: 'warning',
       }).then(async () => {
         try {
-          await expensaResource.destroy(id);
+          await expensaResource.destroy(idExpensa);
           this.getList();
         } catch (error) {
           this.$message.error('An error occurred while deleting data');
@@ -261,13 +242,13 @@ export default {
       });
     },
     async handleRestore(expensa) {
-      this.$confirm(`Esta seguro de restaurar ${expensa.montoPagar}?`, 'Warning', {
+      this.$confirm(`Esta seguro de restaurar ${expensa.monto}?`, 'Warning', {
         confirmButtonText: 'OK',
         cancelButtonText: 'Cancel',
         type: 'warning',
       }).then(async () => {
         try {
-          const updatedExpensa = { ...expensa, idStatus: 1 };
+          const updatedExpensa = { ...expensa, status: 'Activo' };
           await expensaResource.update(expensa.idExpensa, updatedExpensa);
           this.getList();
         } catch (error) {
@@ -279,11 +260,11 @@ export default {
     },
     resetNewExpensa() {
       this.newExpensa = {
+        idExpensa: '',
         idPropiedad: '',
-        montoPagar: '',
-        fechaVencimiento: '',
-        idStatus: 1,
-        usuarios: [], // Añadir esta línea
+        monto: '',
+        mes: '',
+        status: 'Activo',
       };
     },
   },

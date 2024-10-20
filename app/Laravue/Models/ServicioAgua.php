@@ -16,23 +16,22 @@ class ServicioAgua extends Model
     protected $primaryKey = 'idServicio';
 
     protected $fillable = [
+        'idPropiedad',
         'montoPagar',
         'fechaMedicion',
         'medicion',
         'previaMedicion',
-        'idStatus'
+        'status'
     ];
 
     protected $casts = [
         'montoPagar' => 'decimal:2',
-        'fechaMedicion' => 'datetime',
+        'fechaMedicion' => 'date',
         'medicion' => 'integer',
-        'previaMedicion' => 'integer',
-        'idStatus' => 'integer'
     ];
 
-    public function usuarios()
+    public function propiedad()
     {
-        return $this->belongsToMany(User::class)->using(UsuarioServicio::class);
+        return $this->belongsTo(Propiedad::class, 'idPropiedad', 'idPropiedad');
     }
 }

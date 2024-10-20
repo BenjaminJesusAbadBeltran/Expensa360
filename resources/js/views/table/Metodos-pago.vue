@@ -11,7 +11,7 @@
         {{ $t('table.add') }}
       </el-button>
       <el-checkbox v-model="filterStatus" @change="filterByStatus" class="filter-item" style="margin-left: 10px;">
-        Expensas Eliminadas
+        Metodos de Pago Eliminados
       </el-checkbox>
     </div>
     <el-table v-loading="loading" :data="list" border fit highlight-current-row style="width: 80%; ">
@@ -21,10 +21,10 @@
       <el-table-column label="Acciones" width="300">
         <template slot-scope="scope">
           <el-button size="mini" type="warning" @click="handleEdit(scope.row.idMetodo)">Edit</el-button>
-          <el-button v-show="scope.row.idStatus == 0" size="mini" type="success"
+          <el-button v-show="scope.row.status == 'Borrado'" size="mini" type="success"
             @click="handleRestore(scope.row)">Restore</el-button>
-          <el-button v-show="scope.row.idStatus !== 0" size="mini" type="danger"
-          @click="handleDelete(scope.row.idExpensa, scope.row.montoPagar)">Eliminar</el-button>
+          <el-button v-show="scope.row.status !== 'Borrado'" size="mini" type="danger"
+          @click="handleDelete(scope.row.idMetodo, scope.row.nombre)">Eliminar</el-button>
           <el-button size="mini" type="info" @click="showImage(scope.row.imagen)">Show Image</el-button>
         </template>
       </el-table-column>
@@ -43,12 +43,6 @@
           </el-form-item>
           <el-form-item label="Imagen" prop="imagen" :label-width="formLabelWidth">
             <input type="file" @change="handleImageChange" />
-          </el-form-item>
-          <el-form-item label="Estado de Visualizacion" prop="idStatus" :label-width="formLabelWidth">
-            <el-select v-model="newMetodoPago.idStatus" placeholder="Select Status">
-              <el-option label="Activo" :value="1"></el-option>
-              <el-option label="Inactivo" :value="0"></el-option>
-            </el-select>
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -81,7 +75,7 @@ export default {
   data() {
     return {
       filterStatus: false,
-      list: null,
+      list: [],
       total: 0,
       loading: true,
       dialogFormVisible: false,
@@ -123,7 +117,7 @@ export default {
       this.getList();
     },
     filterByStatus() {
-      this.query.idStatus = this.filterStatus ? 0 : null;
+      this.query.status = this.filterStatus ? 'Borrado' : null;
       this.getList();
     },
     handleCreate() {
@@ -204,15 +198,17 @@ export default {
         }
       });
     },
-    async handleDelete(id, nombre) {
+    async handleDelete(idMetodo, nombre) {
       this.$confirm(`This will permanently delete MetodoPago ${nombre}. Continue?`, 'Warning', {
         confirmButtonText: 'OK',
         cancelButtonText: 'Cancel',
         type: 'warning',
       }).then(async () => {
         try {
-          const response = await metodoPagoResource.destroy(id);
-          if (response && response.message) {
+          console.log('Deleting MetodoPago with ID:', idMetodo);
+          const response = await metodoPagoResource.destroy(idMetodo);
+          console.log('Response from API:', response);
+          if (response && response.data) {
             this.$message({
               message: 'MetodoPago deleted successfully',
               type: 'success',
@@ -222,6 +218,7 @@ export default {
             this.$message.error('Failed to delete data');
           }
         } catch (error) {
+          console.error('Error while deleting MetodoPago:', error);
           this.$message.error('An error occurred while deleting data');
         }
       });
@@ -231,21 +228,29 @@ export default {
         nombre: '',
         cuenta: '',
         imagen: '',
-        idStatus: 1,
+        status: 'Activo',
       };
     },
     handleImageChange(event) {
       const file = event.target.files[0];
       if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          this.newMetodoPago.imagen = e.target.result;
-        };
-        reader.readAsDataURL(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.newMetodoPago.imagen = e.target.result;
+      };
+      reader.readAsDataURL(file);
       }
     },
     showImage(image) {
+      if (!image) {
+      this.$message.error('No image available');
+      return;
+      }
+      if (image.startsWith('data:image')) {
+      this.imageSrc = image;
+      } else {
       this.imageSrc = `/storage/${image}`;
+      }
       this.imageDialogVisible = true;
     },
     async handleRestore(metodoPago) {
@@ -257,7 +262,7 @@ export default {
         try {
           const response = await metodoPagoResource.get(metodoPago.idMetodo);
           if (response && response.data) {
-            const updatedMetodoPago = { ...response.data, idStatus: 1 };
+            const updatedMetodoPago = { ...response.data, status: 'Activo' };
             await metodoPagoResource.update(metodoPago.idMetodo, updatedMetodoPago);
             this.getList();
             this.$message({

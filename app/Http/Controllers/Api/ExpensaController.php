@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
 use App\Laravue\Models\Expensa;
-use App\Laravue\Models\Propiedad; // Asegúrate de importar el modelo Propiedad
+use App\Laravue\Models\Propiedad;
 use App\Http\Resources\ExpensaResource;
 use Illuminate\Support\Arr;
 
@@ -17,25 +17,29 @@ class ExpensaController extends BaseController
      *
      * @return \Illuminate\Http\Response
      */
-
     public function index(Request $request)
-    {   
-        $searchParams = $request->all();
-        $expensaQuery = Expensa::with('usuarios'); // Añadir 'usuarios' a la carga ansiosa
-        $limit = Arr::get($searchParams, 'limit', static::ITEM_PER_PAGE);
-        $keyword = Arr::get($searchParams, 'keyword', '');
-        $idStatus = Arr::get($searchParams, 'idStatus', 1); // Default to 1
-
-        if (!empty($keyword)) {
-            $expensaQuery->where('idExpensa', 'LIKE', '%' . $keyword . '%');
+    {
+        try {
+            $searchParams = $request->all();
+            $expensaQuery = Expensa::query();
+            $limit = Arr::get($searchParams, 'limit', static::ITEM_PER_PAGE);
+            $keyword = Arr::get($searchParams, 'keyword', '');
+            $status = Arr::get($searchParams, 'status', 'Activo'); // Default to 'Activo'
+    
+            if (!empty($keyword)) {
+                $expensaQuery->where('idExpensa', 'LIKE', '%' . $keyword . '%');
+            }
+    
+            if (!is_null($status)) {
+                $expensaQuery->where('status', $status);
+            }
+    
+            return ExpensaResource::collection($expensaQuery->paginate($limit));
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        if (!is_null($idStatus)) {
-            $expensaQuery->where('idStatus', $idStatus);
-        }
-
-        return ExpensaResource::collection($expensaQuery->paginate($limit));
     }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -46,15 +50,15 @@ class ExpensaController extends BaseController
     {
         $validatedData = $request->validate([
             'idPropiedad' => 'required|integer',
-            'montoPagar' => 'required|numeric',
-            'fechaVencimiento' => 'required|date',
-            'idStatus' => 'required|integer|in:0,1',
-            'usuarios' => 'array', // Validar que usuarios sea un array
-            'usuarios.*' => 'integer|exists:users,idUsuario', // Validar que cada usuario exista
+            'monto' => 'required|numeric',
+            'mes' => 'required|string',
         ]);
 
-        // Set default value for idStatus if not provided
-        $validatedData['idStatus'] = $validatedData['idStatus'] ?? 1;
+        // Formatear el campo 'mes' para que incluya el primer día del mes
+        $validatedData['mes'] = date('Y-m-10', strtotime($validatedData['mes']));
+
+        // Set default value for status if not provided
+        $validatedData['status'] = $validatedData['status'] ?? 'Activo';
 
         $expensa = Expensa::create($validatedData);
 
@@ -87,12 +91,13 @@ class ExpensaController extends BaseController
     {
         $validatedData = $request->validate([
             'idPropiedad' => 'required|integer|exists:propiedades,idPropiedad',
-            'montoPagar' => 'required|numeric',
-            'fechaVencimiento' => 'required|date',
-            'idStatus' => 'required|integer',
-            'usuarios' => 'array', // Validar que usuarios sea un array
-            'usuarios.*' => 'integer|exists:users,idUsuario', // Validar que cada usuario exista
+            'monto' => 'required|numeric',
+            'mes' => 'required|string',
+            'status' => 'required|string',
         ]);
+
+        // Formatear el campo 'mes' para que incluya el primer día del mes
+        $validatedData['mes'] = date('Y-m-10', strtotime($validatedData['mes']));
 
         $expensa->update($validatedData);
 
@@ -101,7 +106,6 @@ class ExpensaController extends BaseController
             $expensa->usuarios()->sync($validatedData['usuarios']);
         }
         return new ExpensaResource($expensa);
-        return response()->json(['message' => 'Expensa Actualizada'], 200);
     }
 
     /**
@@ -112,10 +116,9 @@ class ExpensaController extends BaseController
      */
     public function destroy(Expensa $expensa)
     {
-        $expensa->idStatus = 0;
+        $expensa->status = 'Borrado';
         $expensa->save();
 
         return response()->json(['message' => 'Expensa borrada'], 200);
     }
-
 }

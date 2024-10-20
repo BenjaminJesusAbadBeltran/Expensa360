@@ -18,8 +18,10 @@ class EgresoResource extends JsonResource
         return [
             'idEgreso' => $this->idEgreso,
             'idCajaChica' => $this->idCajaChica,
+            'concepto' => $this->concepto,
             'monto' => $this->monto,
-            'idStatus' => $this->idStatus,
+            'fechaEgreso' => $this->fechaEgreso,
+            'status' => $this->status,
             'cajaChica' => new CajaChicaResource($this->whenLoaded('cajaChica')),
         ];
     }

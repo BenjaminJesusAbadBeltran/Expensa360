@@ -1,0 +1,29 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use Illuminate\Http\Request;
+use Carbon\Carbon;
+use App\Models\Pago; // Asegúrate de tener este modelo
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\BaseController;
+
+class PronosticoController extends BaseController
+{
+    public function pronosticoIngresos()
+    {
+        // Cargar los datos de ingresos desde la base de datos
+        $ingresos = DB::table('ingresos')
+            ->select('fecha as ds', 'monto as y')
+            ->get();
+
+        // Convertir a DataFrame de Pandas y ejecutar Prophet en Python
+        $command = "python3 /public/pronostico.py";  // Reemplaza con la ruta de tu script de Prophet
+        $output = shell_exec($command);
+
+        // Decodificar el resultado del pronóstico
+        $pronostico = json_decode($output, true);
+
+        return response()->json($pronostico);
+    }
+}

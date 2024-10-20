@@ -33,9 +33,13 @@ class CajaChicaController extends BaseController
         $cajaChicaQuery = CajaChica::query();
         $limit = Arr::get($searchParams, 'limit', static::ITEM_PER_PAGE);
         $keyword = Arr::get($searchParams, 'keyword', '');
+        $status = Arr::get($searchParams, 'status', 'Activo'); // Default to 'Activo'
 
         if (!empty($keyword)) {
             $cajaChicaQuery->where('idCajaChica', 'LIKE', '%' . $keyword . '%');
+        }
+        if (!is_null($status)) {
+            $cajaChicaQuery->where('status', $status);
         }
 
         return CajaChicaResource::collection($cajaChicaQuery->paginate($limit));
@@ -49,21 +53,20 @@ class CajaChicaController extends BaseController
      */
     public function store(Request $request)
     {
-        $validator = Validator::make(
-            $request->all(),
-            $this->getValidationRules()
-        );
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 403);
-        } else {
-            $params = $request->all();
-            $cajaChica = CajaChica::create([
-                'total' => $params['total'],
-            ]);
+        $validatedData = $request->validate([
+            'saldoInicial' => 'required|numeric',
+            'saldoActual' => 'required|numeric',
+            'saldoFinal' => 'required|numeric',
+            'fecha_Inicial' => 'required|date',
+            'fecha_Final' => 'required|date',
+        ]);
 
-            return new CajaChicaResource($cajaChica);
-        }
+        $validatedData['status'] = $validatedData['status'] ?? 'Activo';
+
+        $cajaChica = CajaChica::create($validatedData);
+
+        return new CajaChicaResource($cajaChica);
     }
 
     /**
@@ -90,23 +93,18 @@ class CajaChicaController extends BaseController
      * @param CajaChica $cajaChica
      * @return CajaChicaResource|\Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, CajaChica $cajaChica)
     {
-        $cajaChica = CajaChica::find($id);
-
-        if (!$cajaChica) {
-            return response()->json(['error' => 'CajaChica not found'], 404);
-        }
-
-        $validator = Validator::make($request->all(), [
-            'total' => 'required|numeric',
+        $validatedData = $request->validate([
+            'saldoInicial' => 'required|numeric',
+            'saldoActual' => 'required|numeric',
+            'saldoFinal' => 'required|numeric',
+            'fecha_Inicial' => 'required|date',
+            'fecha_Final' => 'required|date',
+            'status' => 'required|string',
         ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 403);
-        }
         
-        $cajaChica->update($validator->validated());
+        $cajaChica->update($validatedData);
         return new CajaChicaResource($cajaChica);
     }
 
@@ -116,16 +114,12 @@ class CajaChicaController extends BaseController
      * @param  CajaChica $cajaChica
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(CajaChica $cajaChica)
     {
-        $cajaChica = CajaChica::find($id);
+        $cajaChica->status = 'Borrado';
+        $cajaChica->save();
 
-        if ($cajaChica) {
-            $cajaChica->delete();
-            return response()->json(['message' => 'CajaChica deleted successfully'], 200);
-        } else {
-            return response()->json(['message' => 'CajaChica not found'], 404);
-        }
+        return response()->json(['message' => 'CajaChica updated to idStatus 0'], 200);
     }
 
     /**
@@ -135,7 +129,11 @@ class CajaChicaController extends BaseController
     private function getValidationRules($isNew = true)
     {
         return [
-            'total' => 'required|numeric',
+            'saldoInicial' => 'required|numeric',
+            'saldoActual' => 'required|numeric',
+            'saldoFinal' => 'required|numeric',
+            'fecha_Inicial' => 'required|date',
+            'fecha_Final' => 'required|date',
         ];
     }
 }

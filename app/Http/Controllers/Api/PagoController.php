@@ -4,13 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Laravue\Models\Pago;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Api\Controller;
 use App\Http\Resources\PagoResource;
 use Illuminate\Support\Arr;
 
 class PagoController extends BaseController
 {
-    const ITEM_PER_PAGE = 15;
+    const ITEM_PER_PAGE = 10;
 
     /**
      * Display a listing of the resource.
@@ -21,12 +20,17 @@ class PagoController extends BaseController
     public function index(Request $request)
     {
         $searchParams = $request->all();
-        $pagoQuery = Pago::where('idStatus', 1); // Filtrar por idStatus = 1
+        $pagoQuery = Pago::query();
         $limit = Arr::get($searchParams, 'limit', static::ITEM_PER_PAGE);
         $keyword = Arr::get($searchParams, 'keyword', '');
+        $status = Arr::get($searchParams, 'status', 'Activo'); // Default to 'Activo'
 
         if (!empty($keyword)) {
             $pagoQuery->where('idPago', 'LIKE', '%' . $keyword . '%');
+        }
+
+        if (!is_null($status)) {
+            $pagoQuery->where('status', $status);
         }
 
         return PagoResource::collection($pagoQuery->paginate($limit));
@@ -42,13 +46,17 @@ class PagoController extends BaseController
     {
         $validatedData = $request->validate([
             'idMetodoPago' => 'required|integer',
-            'idCajaChica' => 'required|integer',
-            'monto' => 'required|numeric',
+            'idPropiedad' => 'required|integer',
+            'idUsuario' => 'required|integer',
+            'montoTotal' => 'required|numeric|min:0',
             'fechaPago' => 'required|date',
-            'idStatus' => 'required|integer',
+            'status' => 'required|string',
         ]);
 
+        $validatedData['status'] = $validatedData['status'] ?? 'Activo';
+
         $pago = Pago::create($validatedData);
+
         return new PagoResource($pago);
     }
 
@@ -73,14 +81,16 @@ class PagoController extends BaseController
     public function update(Request $request, Pago $pago)
     {
         $validatedData = $request->validate([
-            'idMetodoPago' => 'required|integer',
-            'idCajaChica' => 'required|integer',
-            'monto' => 'required|numeric',
+            'idMetodoPago' => 'required|integer|exists:metodos_pago,idMetodo',
+            'idPropiedad' => 'required|integer|exists:propiedades,idPropiedad',
+            'idUsuario' => 'required|integer|exists:users,idUsuario',
+            'montoTotal' => 'required|numeric|min:0',
             'fechaPago' => 'required|date',
-            'idStatus' => 'required|integer',
+            'status' => 'required|string',
         ]);
 
         $pago->update($validatedData);
+        
         return new PagoResource($pago);
     }
 
@@ -92,10 +102,10 @@ class PagoController extends BaseController
      */
     public function destroy(Pago $pago)
     {
-        // Cambiar el idStatus a 0
-        $pago->idStatus = 0;
+        // Cambiar el status a 'Borrado'
+        $pago->status = 'Borrado';
         $pago->save();
 
-        return response()->json(['message' => 'Pago updated to idStatus 0'], 200);
+        return response()->json(['message' => 'Pago updated to status Borrado'], 200);
     }
 }

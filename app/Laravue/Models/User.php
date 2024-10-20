@@ -112,7 +112,7 @@ class User extends Authenticatable
 
     public function propiedades()
     {
-        return $this->belongsToMany(Propiedad::class)->using(UsuarioPropiedad::class);
+        return $this->belongsToMany(Propiedad::class, 'usuario_propiedad', 'idUsuario', 'idPropiedad')->using(UsuarioPropiedad::class);
     }
 
     public function pagos()

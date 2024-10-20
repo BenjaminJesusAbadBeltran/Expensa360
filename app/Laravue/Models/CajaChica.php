@@ -29,16 +29,7 @@ class CajaChica extends Model
      * @var array
      */
     protected $fillable = [
-        'total',
-    ];
-
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'total' => 'float',
+        'saldoInicial', 'saldoActual', 'saldoFinal', 'fecha_Inicial', 'fecha_Final', 'status'
     ];
 
     /**

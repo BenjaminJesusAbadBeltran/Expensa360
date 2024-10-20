@@ -15,24 +15,24 @@ class Expensa extends Model
 
     protected $fillable = [
         'idPropiedad',
-        'montoPagar',
-        'fechaVencimiento',
-        'idStatus',
+        'monto',
+        'montoPagado',
+        'montoPendiente',
+        'montoAhorro',
+        'mes',
+        'estado',
+        'status',
     ];
 
     protected $casts = [
-        'montoPagar' => 'decimal:2',
-        'fechaVencimiento' => 'date',
-        'idStatus' => 'integer',
+        'monto' => 'float',
+        'montoPagado' => 'float',
+        'montoPendiente' => 'float',
+        'montoAhorro' => 'float',
     ];
 
     public function propiedad()
     {
         return $this->belongsTo(Propiedad::class, 'idPropiedad', 'idPropiedad');
-    }
-
-    public function usuarios()
-    {
-        return $this->belongsToMany(User::class, 'usuario_expensa', 'idExpensa', 'idUsuario')->using(UsuarioExpensa::class);
     }
 }

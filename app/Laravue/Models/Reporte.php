@@ -16,7 +16,7 @@ class Reporte extends Model
         'idGenerador',
         'tipo_reporte',
         'datos_generados',
-        'idStatus'
+        'status'
     ];
 
     public function generador()

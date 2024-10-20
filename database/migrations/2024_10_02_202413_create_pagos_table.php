@@ -23,7 +23,7 @@ class CreatePagosTable extends Migration
             $table->foreign('idMetodoPago')->references('idMetodo')->on('metodos_pago');
             $table->decimal('montoTotal', 8, 2);
             $table->timestamp('fechaPago')->format('Y-m-d H:i');
-            $table->string('observaciones');
+            $table->string('observaciones')->nullable();
             $table->enum('status', ['Activo', 'Borrado'])->default('Activo');
             $table->timestamps();
             

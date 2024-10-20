@@ -16,11 +16,13 @@ class ServicioAguaResource extends JsonResource
     {
         return [
             'idServicio' => $this->idServicio,
+            'idPropiedad' => $this->idPropiedad,
             'montoPagar' => number_format((float)$this->montoPagar, 2, '.', ''),
-            'fechaMedicion' => $this->fechaMedicion,
+            'fechaMedicion' => $this->fechaMedicion->format('Y-m-d'),
             'medicion' => $this->medicion,
             'previaMedicion' => $this->previaMedicion,
-            'idStatus' => $this->idStatus,
+            'status' => $this->status,
+            'propiedad' => new PropiedadResource($this->whenLoaded('propiedad')),
         ];
     }
 }

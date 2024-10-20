@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\Api\PronosticoController;
+use Illuminate\Support\Facades\DB;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -102,11 +104,15 @@ Route::namespace('Api')->group(function() {
         Route::apiResource('metodos-pago', 'MetodoPagoController')->middleware('permission:' . Acl::PERMISSION_PAYMENT_METHOD_MANAGE);
         Route::apiResource('caja-chica', 'CajaChicaController')->middleware('permission:' . Acl::PERMISSION_PETTY_CASH_MANAGE);
         Route::apiResource('egresos', 'EgresoController')->middleware('permission:' . Acl::PERMISSION_OUTFLOW_MANAGE);
+        Route::apiResource('pago-expensa', 'PagoExpen                       saController')->middleware('permission:' . Acl::PERMISSION_PAID_MANAGE);
         Route::apiResource('pagos', 'PagoController')->middleware('permission:' . Acl::PERMISSION_PAYMENT_MANAGE);
         Route::apiResource('reportes', 'ReporteController')->middleware('permission:' . Acl::PERMISSION_REPORT_MANAGE);
         
         //Modelo de Analisis de Ingresos
         Route::get('/pronostico-ingresos', [PronosticoController::class, 'pronosticoIngresos']);
+        
+        //Reporte
+        Route::post('/generate-report', [ReporteController::class, 'generateReport'])->middleware('permission:' . Acl::PERMISSION_REPORT_MANAGE);
         
     });
 });

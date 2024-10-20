@@ -19,17 +19,18 @@ class Pago extends Model
     protected $primaryKey = 'idPago';
     
     protected $fillable = [
+        'idUsuario',
+        'idPropiedad',
         'idMetodoPago',
-        'idCajaChica',
-        'monto',
+        'montoTotal',
         'fechaPago',
-        'idStatus',
+        'observaciones',
+        'status',
     ];
 
     protected $casts = [
-        'monto' => 'decimal:2',
+        'montoTotal' => 'decimal:2',
         'fechaPago' => 'datetime',
-        'idStatus' => 'integer',
     ];
 
     /**
@@ -40,16 +41,14 @@ class Pago extends Model
         return $this->belongsTo(MetodoPago::class, 'idMetodoPago', 'idMetodo'); // Especifica las columnas correctas
     }
 
-    /**
-     * Get the cajaChica associated with the Pago.
-     */
-    public function cajaChica()
+    public function propiedad()
     {
-        return $this->belongsTo(CajaChica::class, 'idCajaChica');
+        return $this->belongsTo(Propiedad::class, 'idPropiedad', 'idPropiedad');
     }
 
     public function usuarios()
     {
-        return $this->belongsToMany(User::class, 'usuario_pago', 'idPago', 'idUsuario')->using(UsuarioPago::class);
+        return $this->belongsTo(User::class, 'idUsuario', 'idUsuario');
     }
+    
 }

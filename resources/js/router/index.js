@@ -214,6 +214,12 @@ export const asyncRoutes = [
         meta: { title: 'Pagos', icon: 'el-icon-bank-card' },
       },
       {
+        path: 'paga-expensa',
+        component: () => import('@/views/table/PagoExpensa'),
+        name: 'Pagar Expensa',
+        meta: { title: 'Pagar Expensa', icon: 'international' },
+      },
+      {
         path: 'metodos-pago',
         component: () => import('@/views/table/Metodos-pago'),
         name: 'Metodos de Pago',
@@ -226,13 +232,20 @@ export const asyncRoutes = [
     path: '/pdf',
     component: Layout,
     redirect: '/pdf/index',
-    meta: { title: 'pdf', icon: 'pdf', permissions: ['view menu pdf'] },
+    meta: { title: 'Reportes', icon: 'pdf', permissions: ['view menu pdf'] },
     children: [
       {
         path: 'index',
-        component: () => import('@/views/pdf'),
+        component: () => import('@/views/pdf/index.vue'),
         name: 'Reportes',
-        meta: { title: 'pdf' },
+        meta: { title: 'Reportes' },
+      },
+      {
+        path: 'download',
+        component: () => import('@/views/pdf/download.vue'),
+        name: 'Download',
+        meta: { title: 'Descargar Reporte' },
+        hidden: true,
       },
     ],
   },

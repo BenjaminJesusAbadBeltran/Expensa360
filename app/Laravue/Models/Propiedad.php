@@ -18,11 +18,11 @@ class Propiedad extends Model
         'piso',
         'nombre',
         'tipo_propiedad',
-        'idStatus',
+        'status',
     ];
 
     public function usuarios()
     {
-        return $this->belongsToMany(User::class)->using(UsuarioPropiedad::class);
+        return $this->belongsToMany(User::class, 'usuario_propiedad', 'idPropiedad', 'idUsuario')->using(UsuarioPropiedad::class);
     }
 }

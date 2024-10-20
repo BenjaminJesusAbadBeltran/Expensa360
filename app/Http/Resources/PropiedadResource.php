@@ -20,7 +20,8 @@ class PropiedadResource extends JsonResource
             'piso' => $this->piso,
             'nombre' => $this->nombre,
             'tipo_propiedad' => $this->tipo_propiedad,
-            'idStatus' => $this->idStatus,
+            'status' => $this->status,
+            'usuarios' => UserResource::collection($this->whenLoaded('usuarios')),
         ];
     }
 }

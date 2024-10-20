@@ -41,6 +41,7 @@ final class Acl
     const PERMISSION_USER_MANAGE = 'manage user';
     const PERMISSION_EXPENSE_MANAGE = 'manage expense';
     const PERMISSION_PROPERTY_MANAGE = 'manage property';
+    const PERMISSION_PAID_MANAGE = 'manage paid';
     const PERMISSION_PAYMENT_MANAGE = 'manage payment';
     const PERMISSION_ARTICLE_MANAGE = 'manage article';
     const PERMISSION_OUTFLOW_MANAGE = 'manage outflow';

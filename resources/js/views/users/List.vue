@@ -139,10 +139,10 @@
           <el-form-item :label="$t('user.telefono')" prop="telefono">
             <el-input v-model="newUser.telefono" />
           </el-form-item>
-          <el-form-item :label="$t('user.password')" prop="password">
+          <el-form-item v-if="dialogStatus === 'create'" :label="$t('user.password')" prop="password">
             <el-input v-model="newUser.password" show-password />
           </el-form-item>
-          <el-form-item :label="$t('user.confirmPassword')" prop="confirmPassword">
+          <el-form-item v-if="dialogStatus === 'create'" :label="$t('user.confirmPassword')" prop="confirmPassword">
             <el-input v-model="newUser.confirmPassword" show-password />
           </el-form-item>
         </el-form>
@@ -183,6 +183,7 @@ export default {
       }
     };
     return {
+      dialogStatus: '',
       filterStatus: false,
       list: null,
       total: 0,

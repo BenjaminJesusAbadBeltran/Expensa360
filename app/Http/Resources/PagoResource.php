@@ -16,14 +16,16 @@ class PagoResource extends JsonResource
     {
         return [
             'idPago' => $this->idPago,
+            'idUsuario' => $this->idUsuario,
+            'idPropiedad' => $this->idPropiedad,
             'idMetodoPago' => $this->idMetodoPago,
-            'idCajaChica' => $this->idCajaChica,
-            'monto' => number_format((float)$this->monto, 2, '.', ''),
+            'montoTotal' => $this->montoTotal,
             'fechaPago' => $this->fechaPago->format('Y-m-d H:i'),
-            'idStatus' => $this->idStatus,
+            'observaciones' => $this->observaciones,
+            'status' => $this->status,
             'metodoPago' => new MetodoPagoResource($this->whenLoaded('metodoPago')),
-            'cajaChica' => new CajaChicaResource($this->whenLoaded('cajaChica')),
-            'usuarios' => UserResource::collection($this->whenLoaded('usuarios')),
+            'propiedad' => new PropiedadResource($this->whenLoaded('propiedad')),
+            'usuarios' => UserResource::collection($this->whenLoaded('users')),
         ];
     }
 }
