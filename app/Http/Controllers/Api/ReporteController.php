@@ -98,35 +98,115 @@ class ReporteController extends BaseController
         return response()->json(['message' => 'Reporte updated to idStatus 0'], 200);
     }
 
+    // Devuelve la lista de tablas de la base de datos
+    // public function getTables()
+    // {
+    //     // Obtener las tablas de la base de datos
+    //     $tables = DB::select('SHOW TABLES');
+    //     dd($tables);
 
+    //     // Listado de tablas a excluir
+    //     $excludedTables = [
+    //         'failed_jobs',
+    //         'migrations',
+    //         'password_resets',
+    //         'personal_access_tokens',
+    //         'role_has_permissions',
+    //         'model_has_permissions',
+    //         'model_has_roles',
+            
+    //     ];
 
-public function generateReport(Request $request)
-{
-    $validatedData = $request->validate([
-        'table' => 'required|string',
-        'attributes' => 'required|array',
-        'attributes.*' => 'string',
-        'dateFrom' => 'nullable|date',
-        'dateTo' => 'nullable|date',
-    ]);
+    //     // Filtrar las tablas excluidas
+    //     $filteredTables = array_filter($tables, function($table) use ($excludedTables) {
+    //         return !in_array($table->Tables_in_laravel, $excludedTables);
+    //     });
+    //     dd($filteredTables);
 
-    $table = $validatedData['table'];
-    $attributes = $validatedData['attributes'];
-    $dateFrom = $validatedData['dateFrom'];
-    $dateTo = $validatedData['dateTo'];
+    //     // Formatear la respuesta para que sea un array de strings
+    //     $formattedTables = array_map(function($table) {
+    //         return $table->Tables_in_laravel;
+    //     }, $filteredTables);
 
-    $query = DB::table($table)->select($attributes);
+    //     return response()->json($formattedTables);
+    // }
 
-    if ($dateFrom) {
-        $query->whereDate('created_at', '>=', $dateFrom);
+    public function fetchTables()
+    {
+        try {
+            // Obtener las tablas de la base de datos
+            $tables = DB::select('SHOW TABLES');
+
+            // Listado de tablas a excluir
+            $excludedTables = [
+                'failed_jobs',
+                'migrations',
+                'password_resets',
+                'personal_access_tokens',
+                'role_has_permissions',
+                'model_has_permissions',
+                'model_has_roles',
+                'permissions',
+                'roles',
+                'usuario_propiedad',
+                'reportes',
+            ];
+
+            // Filtrar las tablas excluidas
+            $filteredTables = array_filter($tables, function($table) use ($excludedTables) {
+                return !in_array($table->Tables_in_laravel, $excludedTables);
+            });
+
+            // Formatear la respuesta para que sea un array de strings
+            $formattedTables = array_map(function($table) {
+                return $table->Tables_in_laravel;
+            }, $filteredTables);
+
+            return response()->json(array_values($formattedTables)); // Asegúrate de devolver un array de strings
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
-    if ($dateTo) {
-        $query->whereDate('created_at', '<=', $dateTo);
+    public function fetchColumns($table)
+    {
+        try {
+            // Obtener las columnas de la tabla especificada
+            $columns = DB::getSchemaBuilder()->getColumnListing($table);
+    
+            // Listado de columnas a excluir
+            $excludedColumns = [
+                'created_at',
+                'updated_at',
+                'deleted_at',
+                'status'
+            ];
+    
+            // Filtrar las columnas excluidas
+            $filteredColumns = array_filter($columns, function($column) use ($excludedColumns) {
+                return !in_array($column, $excludedColumns);
+            });
+    
+            // Si la tabla es 'users', reemplazar 'idPropiedad' con 'nombrePropiedad'
+            if ($table === 'pagos') {
+                $filteredColumns = array_map(function($column) {
+                    return $column === 'idPropiedad' ? 'nombrePropiedad' : $column;
+                }, $filteredColumns);
+            }
+            return response()->json(array_values($filteredColumns));
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
-    $data = $query->get();
-
-    return response()->json($data);
-}
+    public function fetchTableData($table)
+    {
+        try {
+            // Obtener los datos de la tabla especificada
+            $data = DB::table($table)->get();
+            return response()->json($data);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 }

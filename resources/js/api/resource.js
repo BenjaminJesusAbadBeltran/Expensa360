@@ -40,6 +40,11 @@ class Resource {
       method: 'delete',
     });
   }
+
+  request(options) {
+    return request(options);
+  }
+
 }
 
 export { Resource as default };

@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\Api\PronosticoController;
+use App\Http\Controllers\Api\ReporteController;
 use Illuminate\Support\Facades\DB;
 
 
@@ -112,8 +113,10 @@ Route::namespace('Api')->group(function() {
         Route::get('/pronostico-ingresos', [PronosticoController::class, 'pronosticoIngresos']);
         
         //Reporte
-        Route::post('/generate-report', [ReporteController::class, 'generateReport'])->middleware('permission:' . Acl::PERMISSION_REPORT_MANAGE);
-        
+        Route::get('report/tables', [ReporteController::class, 'getTables']);
+        Route::get('/report/tables/{table}/columns', [ReporteController::class, 'fetchColumns']);
+        Route::get('/report/tables/{table}/data', [ReporteController::class, 'fetchTableData']);
+        Route::get('/report/tables', [ReporteController::class, 'fetchTables']);
     });
 });
 

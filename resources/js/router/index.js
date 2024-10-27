@@ -248,7 +248,7 @@ export const asyncRoutes = [
         hidden: true,
       },
     ],
-  },
+  },  
   {
     path: '/IA',
     component: Layout,
