@@ -21,7 +21,7 @@ class ExpensaResource extends JsonResource
             'montoPagado' => number_format((float)$this->montoPagado, 2, '.', ''),
             'montoPendiente' => number_format((float)$this->montoPendiente, 2, '.', ''),
             'montoAhorro' => number_format((float)$this->montoAhorro, 2, '.', ''),
-            'mes' => $this->mes,
+            'mes_gestion' => $this->mes_gestion,
             'estado' => $this->estado,
             'status' => $this->status,
             'propiedad' => new PropiedadResource($this->whenLoaded('propiedad')),

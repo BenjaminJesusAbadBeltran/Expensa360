@@ -2,15 +2,17 @@
   <div class="app-container">
     <div class="filter-container">
       <el-input v-model="query.keyword" style="width: 400px;" placeholder="Search by ID" class="filter-item"
-        @keyup.enter.native="handleFilter" />
+                @keyup.enter.native="handleFilter"
+      />
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         {{ $t('table.search') }}
       </el-button>
       <el-button class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-plus"
-        @click="handleCreate">
+                 @click="handleCreate"
+      >
         {{ $t('table.add') }}
       </el-button>
-      <el-checkbox v-model="filterStatus" @change="filterByStatus" class="filter-item" style="margin-left: 10px;">
+      <el-checkbox v-model="filterStatus" class="filter-item" style="margin-left: 10px;" @change="filterByStatus">
         Pagos Eliminados
       </el-checkbox>
     </div>
@@ -27,29 +29,33 @@
         <template slot-scope="scope">
           <el-button size="mini" type="warning" @click="handleEdit(scope.row.idPago)">Editar</el-button>
           <el-button v-show="scope.row.status == 'Borrado'" size="mini" type="success"
-            @click="handleRestore(scope.row)">Restore</el-button>
+                     @click="handleRestore(scope.row)"
+          >Restore</el-button>
           <el-button v-show="scope.row.status !== 'Borrado'" size="mini" type="danger"
-            @click="handleDelete(scope.row.idPago, scope.row.montoTotal)">Eliminar</el-button>
+                     @click="handleDelete(scope.row.idPago, scope.row.montoTotal)"
+          >Eliminar</el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <pagination v-show="total > 0" :total="total" :page.sync="query.page" :limit.sync="query.limit"
-      @pagination="getList" />
-
+                @pagination="getList"
+    />
     <el-dialog :visible.sync="dialogFormVisible" :title="dialogTitle">
       <div v-loading="loading" class="form-container">
-        <el-form :model="newPago" ref="pagoForm" :rules="rules">
+        <el-form ref="pagoForm" :model="newPago" :rules="rules">
           <el-form-item label="Metodo de Pago" :label-width="formLabelWidth" prop="idMetodoPago">
             <el-select v-model="newPago.idMetodoPago" placeholder="Seleccione un metodo de pago">
               <el-option v-for="metodo in metodosPago" :key="metodo.idMetodo" :label="metodo.nombre"
-                :value="metodo.idMetodo" />
+                         :value="metodo.idMetodo"
+              />
             </el-select>
           </el-form-item>
           <el-form-item label="Propiedad" :label-width="formLabelWidth" prop="idPropiedad">
             <el-select v-model="newPago.idPropiedad" placeholder="Seleccione una propiedad">
               <el-option v-for="propiedad in propiedades" :key="propiedad.idPropiedad" :label="propiedad.nombre"
-                :value="propiedad.idPropiedad" />
+                         :value="propiedad.idPropiedad"
+              />
             </el-select>
           </el-form-item>
           <el-form-item label="Usuario" :label-width="formLabelWidth" prop="idUsuario">
@@ -58,13 +64,13 @@
             </el-select>
           </el-form-item>
           <el-form-item label="Monto total" :label-width="formLabelWidth" prop="montoTotal">
-            <el-input v-model="newPago.montoTotal"></el-input>
+            <el-input v-model="newPago.montoTotal" />
           </el-form-item>
           <el-form-item label="Fecha del Pago" :label-width="formLabelWidth" prop="fechaPago">
-            <el-date-picker v-model="newPago.fechaPago" type="datetime" placeholder="Select date"></el-date-picker>
+            <el-date-picker v-model="newPago.fechaPago" type="datetime" placeholder="Select date" />
           </el-form-item>
           <el-form-item label="Observaciones" :label-width="formLabelWidth" prop="observaciones">
-            <el-input v-model="newPago.observaciones"></el-input>
+            <el-input v-model="newPago.observaciones" />
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -170,7 +176,6 @@ export default {
         nombrePropiedad: cajaMap[pago.idPropiedad] || 'N/A',
         nombreUsuario: userMap[pago.idUsuario] || 'N/A',
       }));
-      
       this.list.data;
       this.total = meta.total;
       this.loading = false;
@@ -223,20 +228,20 @@ export default {
       });
     },
     async createData() {
-      this.$refs['pagoForm'].validate(async (valid) => {
+      this.$refs['pagoForm'].validate(async(valid) => {
         if (valid) {
           try {
             await pagoResource.store(this.newPago)
-            .then(response => {
-              this.$message({
-                message: 'New Pago ' + this.newPago.montoTotal + ' has been created successfully.',
-                type: 'success',
-                duration: 5 * 1000,
-            });
-            this.resetNewPago();
-            this.dialogFormVisible = false;
-            this.getList();
-          });
+              .then(response => {
+                this.$message({
+                  message: 'New Pago ' + this.newPago.montoTotal + ' has been created successfully.',
+                  type: 'success',
+                  duration: 5 * 1000,
+                });
+                this.resetNewPago();
+                this.dialogFormVisible = false;
+                this.getList();
+              });
           } catch (error) {
             this.$message.error('An error occurred while saving data');
           }
@@ -262,7 +267,7 @@ export default {
       }
     },
     async updateData() {
-      this.$refs['pagoForm'].validate(async (valid) => {
+      this.$refs['pagoForm'].validate(async(valid) => {
         if (valid) {
           // Convertir fechaPago al formato correcto
           this.newPago.fechaPago = new Date(this.newPago.fechaPago).toISOString().slice(0, 19).replace('T', ' ');
@@ -286,7 +291,7 @@ export default {
         confirmButtonText: 'OK',
         cancelButtonText: 'Cancel',
         type: 'warning',
-      }).then(async () => {
+      }).then(async() => {
         try {
           await pagoResource.destroy(idPago);
           this.getList();
@@ -301,19 +306,19 @@ export default {
     },
     async handleRestore(pago) {
       this.$confirm(`Esta seguro de restaurar el pago de ${pago.montoTotal}?`, 'Warning', {
-      confirmButtonText: 'OK',
-      cancelButtonText: 'Cancel',
-      type: 'warning',
-      }).then(async () => {
-      try {
-        const updatedPago = { ...pago, status: 'Activo' };
-        await pagoResource.update(pago.idPago, updatedPago);
-        this.getList();
-      } catch (error) {
-        this.$message.error('An error occurred while recovering data');
-      }
+        confirmButtonText: 'OK',
+        cancelButtonText: 'Cancel',
+        type: 'warning',
+      }).then(async() => {
+        try {
+          const updatedPago = { ...pago, status: 'Activo' };
+          await pagoResource.update(pago.idPago, updatedPago);
+          this.getList();
+        } catch (error) {
+          this.$message.error('An error occurred while recovering data');
+        }
       }).catch(() => {
-      this.$message.info('Restore cancelled');
+        this.$message.info('Restore cancelled');
       });
     },
     resetNewPago() {

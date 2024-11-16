@@ -2,23 +2,27 @@
   <div class="app-container">
     <div class="filter-container">
       <el-input v-model="query.keyword" :placeholder="$t('table.keyword')" style="width: 200px;" class="filter-item"
-        @keyup.enter.native="handleFilter" />
+                @keyup.enter.native="handleFilter"
+      />
       <el-select v-model="query.role" :placeholder="$t('table.role')" clearable style="width: 150px" class="filter-item"
-        @change="handleFilter">
+                 @change="handleFilter"
+      >
         <el-option v-for="item in roles" :key="item" :label="item | uppercaseFirst" :value="item" />
       </el-select>
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         {{ $t('table.search') }}
       </el-button>
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-plus"
-        @click="handleCreate">
+                 @click="handleCreate"
+      >
         {{ $t('table.add') }}
       </el-button>
       <el-button v-waves :loading="downloading" class="filter-item" type="primary" icon="el-icon-download"
-        @click="handleDownload">
+                 @click="handleDownload"
+      >
         {{ $t('table.export') }}
       </el-button>
-      <el-checkbox v-model="filterStatus" @change="filterByStatus" class="filter-item" style="margin-left: 10px;">
+      <el-checkbox v-model="filterStatus" class="filter-item" style="margin-left: 10px;" @change="filterByStatus">
         Usuarios Eliminados
       </el-checkbox>
     </div>
@@ -64,23 +68,23 @@
       </el-table-column>
       <el-table-column align="center" label="Acciones" width="280">
         <template slot-scope="scope">
-          <el-button type="primary" size="small" icon="el-icon-edit" @click="handleEdit(scope.row.idUsuario);">
-          </el-button>
+          <el-button type="primary" size="small" icon="el-icon-edit" @click="handleEdit(scope.row.idUsuario);" />
           <el-button v-if="!scope.row.roles.includes('super_admin')" v-permission="['manage permission']" type="warning"
-            size="small" icon="el-icon-edit" @click="handleEditPermissions(scope.row.idUsuario);">
+                     size="small" icon="el-icon-edit" @click="handleEditPermissions(scope.row.idUsuario);"
+          >
             Permissions
           </el-button>
           <el-button v-if="scope.row.roles.includes('socio') || scope.row.roles.includes('inquilino')"
-            v-permission="['manage user']" type="danger" size="small" icon="el-icon-delete"
-            @click="handleDelete(scope.row.idUsuario, scope.row.nombre);">
-          </el-button>
+                     v-permission="['manage user']" type="danger" size="small" icon="el-icon-delete"
+                     @click="handleDelete(scope.row.idUsuario, scope.row.nombre);"
+          />
         </template>
       </el-table-column>
     </el-table>
 
     <pagination v-show="total > 0" :total="total" :page.sync="query.page" :limit.sync="query.limit"
-      @pagination="getList" />
-
+                @pagination="getList"
+    />
     <el-dialog :visible.sync="dialogPermissionVisible" :title="'Edit Permissions - ' + currentUser.nombre">
       <div v-if="currentUser.nombre" v-loading="dialogPermissionLoading" class="form-container">
         <div class="permissions-container">
@@ -88,8 +92,9 @@
             <el-form :model="currentUser" label-width="80px" label-position="top">
               <el-form-item label="Menus">
                 <el-tree ref="menuPermissions" :data="normalizedMenuPermissions"
-                  :default-checked-keys="permissionKeys(userMenuPermissions)" :props="permissionProps" show-checkbox
-                  node-key="id" class="permission-tree" />
+                         :default-checked-keys="permissionKeys(userMenuPermissions)" :props="permissionProps" show-checkbox
+                         node-key="id" class="permission-tree"
+                />
               </el-form-item>
             </el-form>
           </div>
@@ -97,8 +102,9 @@
             <el-form :model="currentUser" label-width="80px" label-position="top">
               <el-form-item label="Permissions">
                 <el-tree ref="otherPermissions" :data="normalizedOtherPermissions"
-                  :default-checked-keys="permissionKeys(userOtherPermissions)" :props="permissionProps" show-checkbox
-                  node-key="id" class="permission-tree" />
+                         :default-checked-keys="permissionKeys(userOtherPermissions)" :props="permissionProps" show-checkbox
+                         node-key="id" class="permission-tree"
+                />
               </el-form-item>
             </el-form>
           </div>
@@ -118,7 +124,8 @@
     <el-dialog :title="'Create new user'" :visible.sync="dialogFormVisible">
       <div v-loading="userCreating" class="form-container">
         <el-form ref="userForm" :rules="rules" :model="newUser" label-position="left" label-width="200px"
-          style="max-width: 500px;">
+                 style="max-width: 500px;"
+        >
           <el-form-item :label="$t('user.role')" prop="role">
             <el-select v-model="newUser.role" class="filter-item" placeholder="Please select role">
               <el-option v-for="item in nonAdminRoles" :key="item" :label="item | uppercaseFirst" :value="item" />
@@ -195,7 +202,7 @@ export default {
         limit: 15,
         keyword: '',
         role: '',
-        status: 'Activo'
+        status: 'Activo',
       },
       roles: ['super_admin', 'directivo', 'admin', 'socio', 'inquilino'],
       nonAdminRoles: ['socio', 'inquilino', 'admin'],
@@ -354,7 +361,7 @@ export default {
       }
     },
     async updateData() {
-      this.$refs['userForm'].validate(async (valid) => {
+      this.$refs['userForm'].validate(async(valid) => {
         if (valid) {
           try {
             await userResource.update(this.newUser.idUsuario, this.newUser);
@@ -375,7 +382,7 @@ export default {
         confirmButtonText: 'OK',
         cancelButtonText: 'Cancel',
         type: 'warning',
-      }).then(async () => {
+      }).then(async() => {
         userResource.destroy(idUsuario).then(() => {
           this.$message({
             type: 'success',
@@ -450,7 +457,7 @@ export default {
         password: '',
         confirmPassword: '',
         role: 'Socio',
-        status: 'Activo'
+        status: 'Activo',
       };
     },
     handleDownload() {

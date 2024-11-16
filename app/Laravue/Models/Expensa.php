@@ -19,7 +19,7 @@ class Expensa extends Model
         'montoPagado',
         'montoPendiente',
         'montoAhorro',
-        'mes',
+        'mes_gestion',
         'estado',
         'status',
     ];

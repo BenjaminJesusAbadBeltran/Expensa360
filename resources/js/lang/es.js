@@ -82,7 +82,7 @@ export default {
     'Servicio de Agua': 'Servicio de Agua',
     'Pago': 'Pago',
     'Pagos': 'Pagos',
-    'Metodos de Pago': 'Métodos de Pago'
+    'Metodos de Pago': 'Métodos de Pago',
   },
   navbar: {
     logOut: 'Cerrar sesión',
@@ -193,7 +193,7 @@ export default {
     'apellidoMaterno': 'Apellido Materno',
     'apellidoPaterno': 'Apellido Paterno',
     'nombre': 'Nombre',
-    'telefono': 'Telefono'
+    'telefono': 'Telefono',
   },
   roles: {
     description: {

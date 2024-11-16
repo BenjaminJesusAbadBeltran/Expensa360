@@ -53,6 +53,12 @@ class ServicioAguaController extends BaseController
      */
     public function store(Request $request)
     {
+
+        // Verificar si fechaMedicion es nulo o vacío
+        if (!$request->filled('fechaMedicion') || empty($request->input('fechaMedicion'))) {
+            $request->merge(['fechaMedicion' => now()->toDateString()]);
+        }
+
         $validatedData = $request->validate([
             'idPropiedad' => 'required|integer|exists:propiedades,idPropiedad',
             'montoPagar' => 'required|numeric',

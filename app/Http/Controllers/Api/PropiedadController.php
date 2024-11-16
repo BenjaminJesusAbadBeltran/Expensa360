@@ -110,8 +110,7 @@ class PropiedadController extends BaseController
         if (!$propiedad) {
             return response()->json(['message' => 'Propiedad not found'], 404);
         }
-    
-        \Log::info('Incoming request data:', $request->all()); // Registro de los datos recibidos
+        //Log::info('Incoming request data:', $request->all()); // Registro de los datos recibidos
     
         $validator = Validator::make($request->all(), [
             'numero' => 'required|string',
@@ -123,25 +122,20 @@ class PropiedadController extends BaseController
             'usuarios.*' => 'exists:users,idUsuario', // Validar que cada usuario exista en la tabla users
         ]);
     
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 403);
-        }
-    
         $validatedData = $validator->validated();
-        \Log::info('Validated data:', $validatedData);
+        //Log::info('Validated data:', $validatedData);
     
         $propiedad->update($validatedData);
     
         // Asociar usuarios a la propiedad
         if (isset($request->usuarios)) {
-            \Log::info('Syncing users:', $request->usuarios);
+            //Log::info('Syncing users:', $request->usuarios);
             $propiedad->usuarios()->sync($request->usuarios);
         }
     
         return new PropiedadResource($propiedad);
     }
     
-
     /**
      * Remove the specified resource from storage.
      *
@@ -161,4 +155,5 @@ class PropiedadController extends BaseController
 
         return response()->json(['message' => 'Propiedad deleted successfully'], 200);
     }
+    
 }

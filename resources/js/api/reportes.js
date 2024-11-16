@@ -9,35 +9,32 @@ class ReporteResource extends Resource {
   fetchTables() {
     return request({
       url: '/report/tables',
-      method: 'get'
-    })
+      method: 'get',
+    });
   }
-  
   // Obtener columnas de una tabla seleccionada
   fetchColumns(table) {
     return request({
       url: `/report/tables/${table}/columns`,
-      method: 'get'
-    })
+      method: 'get',
+    });
   }
 
   fetchTableData(table) {
     return request({
       url: `/report/tables/${table}/data`,
-      method: 'get'
+      method: 'get',
     });
   }
-  
   // Enviar los datos seleccionados para generar el reporte
   generateReport(data) {
     return request({
       url: '/report/generate',
       method: 'post',
       data,
-      responseType: 'blob'  // Para manejar la descarga del PDF
-    })
+      responseType: 'blob', // Para manejar la descarga del PDF
+    });
   }
 }
-
 
 export default ReporteResource;

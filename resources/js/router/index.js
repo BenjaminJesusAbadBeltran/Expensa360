@@ -185,7 +185,7 @@ export const asyncRoutes = [
     path: '/regPropiedades',
     component: Layout,
     redirect: '/tables/propiedades',
-    meta: { title: 'Gestion de Propiedades', icon: 'el-icon-house'},
+    meta: { title: 'Propiedades', icon: 'el-icon-house' },
     children: [
       {
         path: 'properties',
@@ -196,8 +196,8 @@ export const asyncRoutes = [
       {
         path: 'servicio-agua',
         component: () => import('@/views/table/Servicio-agua'),
-        name: 'Servicio de Agua',
-        meta: { title: 'Servicio de Agua', icon: 'el-icon-water-cup' },
+        name: 'Agua',
+        meta: { title: 'Agua', icon: 'el-icon-water-cup' },
       },
     ],
   },
@@ -205,7 +205,7 @@ export const asyncRoutes = [
     path: '/regPago',
     component: Layout,
     redirect: '/table/pagos',
-    meta: { title: 'Pago', icon: 'pdf'},
+    meta: { title: 'Pago', icon: 'pdf' },
     children: [
       {
         path: 'pagos',
@@ -240,15 +240,15 @@ export const asyncRoutes = [
         name: 'Reportes',
         meta: { title: 'Reportes' },
       },
-      {
-        path: 'download',
-        component: () => import('@/views/pdf/download.vue'),
-        name: 'Download',
-        meta: { title: 'Descargar Reporte' },
-        hidden: true,
-      },
+      // {
+      //   path: 'download',
+      //   component: () => import('@/views/pdf/download.vue'),
+      //   name: 'Download',
+      //   meta: { title: 'Descargar Reporte' },
+      //   hidden: true,
+      // },
     ],
-  },  
+  },
   {
     path: '/IA',
     component: Layout,

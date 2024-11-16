@@ -28,7 +28,7 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      pronostico: []
+      pronostico: [],
     };
   },
   mounted() {
@@ -37,8 +37,8 @@ export default {
         this.pronostico = response.data;
       })
       .catch(error => {
-        console.error("Hubo un error al obtener el pronóstico:", error);
+        console.error('Hubo un error al obtener el pronóstico:', error);
       });
-  }
+  },
 };
 </script>

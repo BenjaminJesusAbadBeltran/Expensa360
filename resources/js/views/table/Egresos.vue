@@ -2,15 +2,17 @@
   <div class="app-container">
     <div class="filter-container">
       <el-input v-model="query.keyword" :placeholder="$t('table.keyword')" style="width: 200px;" class="filter-item"
-        @keyup.enter.native="handleFilter" />
+                @keyup.enter.native="handleFilter"
+      />
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         {{ $t('table.search') }}
       </el-button>
       <el-button class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-plus"
-        @click="handleCreate">
+                 @click="handleCreate"
+      >
         {{ $t('table.add') }}
       </el-button>
-      <el-checkbox v-model="filterStatus" @change="filterByStatus" class="filter-item" style="margin-left: 10px;">
+      <el-checkbox v-model="filterStatus" class="filter-item" style="margin-left: 10px;" @change="filterByStatus">
         Pagos Eliminados
       </el-checkbox>
     </div>
@@ -24,42 +26,48 @@
       <el-table-column label="Acciones" width="180">
         <template slot-scope="scope">
           <el-button v-show="scope.row.status !== 'Borrado'" size="mini" type="warning"
-            @click="handleUpdate(scope.row.idEgreso)">Editar</el-button>
+                     @click="handleUpdate(scope.row.idEgreso)"
+          >Editar</el-button>
           <el-button v-show="scope.row.status == 'Borrado'" size="mini" type="success"
-            @click="handleRestore(scope.row)">Restore</el-button>
+                     @click="handleRestore(scope.row)"
+          >Restore</el-button>
           <el-button v-show="scope.row.status !== 'Borrado'" size="mini" type="danger"
-            @click="handleDelete(scope.row.idEgreso)">Eliminar</el-button>
+                     @click="handleDelete(scope.row.idEgreso)"
+          >Eliminar</el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <pagination v-show="total > 0" :total="total" :page.sync="query.page" :limit.sync="query.limit"
-      @pagination="getList" />
-
+                @pagination="getList"
+    />
     <el-dialog :visible.sync="dialogFormVisible" :title="dialogTitle">
       <div v-loading="loading" class="form-container">
         <el-form ref="egresoForm" :rules="rules" :model="newEgreso" label-position="left" :label-width="formLabelWidth">
           <el-form-item label="ID Caja Chica" prop="idCajaChica">
             <el-select v-model="newEgreso.idCajaChica" placeholder="Seleccione una Caja Chica">
               <el-option v-for="cajaChica in cajasChicas" :key="cajaChica.idCajaChica" :label="cajaChica.idCajaChica"
-                :value="cajaChica.idCajaChica" />
+                         :value="cajaChica.idCajaChica"
+              />
             </el-select>
           </el-form-item>
           <el-form-item label="Concepto" prop="concepto" :label-width="formLabelWidth">
-            <el-input v-model="newEgreso.concepto"></el-input>
+            <el-input v-model="newEgreso.concepto" />
           </el-form-item>
           <el-form-item label="Monto" prop="monto" :label-width="formLabelWidth">
-            <el-input v-model="newEgreso.monto"></el-input>
+            <el-input v-model="newEgreso.monto" />
           </el-form-item>
           <el-form-item label="Fecha de Egreso" prop="fechaEgreso" :label-width="formLabelWidth">
             <el-date-picker v-model="newEgreso.fechaEgreso" type="date" placeholder="Seleccione una fecha"
-              :default-value="new Date()"></el-date-picker>
+                            :default-value="new Date()"
+            />
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button @click="dialogFormVisible = false">Cancelar</el-button>
           <el-button type="primary"
-            @click="dialogStatus === 'create' ? createEgreso() : updateEgreso()">Guardar</el-button>
+                     @click="dialogStatus === 'create' ? createEgreso() : updateEgreso()"
+          >Guardar</el-button>
         </div>
       </div>
     </el-dialog>
@@ -159,7 +167,7 @@ export default {
       });
     },
     async createEgreso() {
-      this.$refs['egresoForm'].validate(async (valid) => {
+      this.$refs['egresoForm'].validate(async(valid) => {
         if (valid) {
           await egresoResource.store(this.newEgreso);
           this.dialogFormVisible = false;
@@ -184,7 +192,7 @@ export default {
       }
     },
     async updateEgreso() {
-      this.$refs['egresoForm'].validate(async (valid) => {
+      this.$refs['egresoForm'].validate(async(valid) => {
         if (valid) {
           await egresoResource.update(this.newEgreso.idEgreso, this.newEgreso);
           this.dialogFormVisible = false;
@@ -197,7 +205,7 @@ export default {
         confirmButtonText: 'Sí',
         cancelButtonText: 'No',
         type: 'warning',
-      }).then(async () => {
+      }).then(async() => {
         await egresoResource.destroy(idEgreso);
         this.getList();
       }).catch(() => { });
@@ -207,7 +215,7 @@ export default {
         confirmButtonText: 'OK',
         cancelButtonText: 'Cancel',
         type: 'warning',
-      }).then(async () => {
+      }).then(async() => {
         try {
           const updatedEgreso = { ...egreso, status: 'Activo' };
           await egresoResource.update(egreso.idEgreso, updatedEgreso);

@@ -17,7 +17,6 @@ const tableRoutes = {
       name: 'Expensas',
       meta: { title: 'Expensas', icon: 'el-icon-money' },
     },
-    
     {
       path: 'caja-chica',
       component: () => import('@/views/table/Caja-chica'),
@@ -30,7 +29,6 @@ const tableRoutes = {
       name: 'Egresos',
       meta: { title: 'Egresos', icon: 'el-icon-minus' },
     },
-    
   ],
 };
 export default tableRoutes;

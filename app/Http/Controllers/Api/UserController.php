@@ -33,7 +33,7 @@ class UserController extends BaseController
     public function index(Request $request)
     {
         $searchParams = $request->all();
-        $userQuery = User::query();
+        $userQuery = User::with('propiedades');
         $limit = Arr::get($searchParams, 'limit', static::ITEM_PER_PAGE);
         $role = Arr::get($searchParams, 'role', '');
         $keyword = Arr::get($searchParams, 'keyword', '');
@@ -241,5 +241,17 @@ class UserController extends BaseController
                 'array'
             ],
         ];
+    }
+
+    public function getUserProperties($idUsuario)
+    {
+        try {
+            $user = User::findOrFail($idUsuario);
+            $propiedades = $user->propiedades;
+
+            return PropiedadResource::collection($propiedades);
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()], 403);
+        }
     }
 }

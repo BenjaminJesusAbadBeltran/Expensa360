@@ -25,13 +25,23 @@ class ExpensaController extends BaseController
             $limit = Arr::get($searchParams, 'limit', static::ITEM_PER_PAGE);
             $keyword = Arr::get($searchParams, 'keyword', '');
             $status = Arr::get($searchParams, 'status', 'Activo'); // Default to 'Activo'
-    
+            $propertyId = Arr::get($searchParams, 'propertyId', null); // Obtener el ID de la propiedad
+
             if (!empty($keyword)) {
-                $expensaQuery->where('idExpensa', 'LIKE', '%' . $keyword . '%');
+                $expensaQuery->where(function($query) use ($keyword) {
+                    $query->where('idExpensa', 'LIKE', '%' . $keyword . '%')
+                          ->orWhereHas('propiedad', function($q) use ($keyword) {
+                              $q->where('nombre', 'LIKE', '%' . $keyword . '%');
+                          });
+                });
             }
     
             if (!is_null($status)) {
                 $expensaQuery->where('status', $status);
+            }
+
+            if (!is_null($propertyId)) {
+                $expensaQuery->where('idPropiedad', $propertyId);
             }
     
             return ExpensaResource::collection($expensaQuery->paginate($limit));
@@ -51,11 +61,8 @@ class ExpensaController extends BaseController
         $validatedData = $request->validate([
             'idPropiedad' => 'required|integer',
             'monto' => 'required|numeric',
-            'mes' => 'required|string',
+            'mes_gestion' => 'required|string',
         ]);
-
-        // Formatear el campo 'mes' para que incluya el primer día del mes
-        $validatedData['mes'] = date('Y-m-10', strtotime($validatedData['mes']));
 
         // Set default value for status if not provided
         $validatedData['status'] = $validatedData['status'] ?? 'Activo';
@@ -88,25 +95,32 @@ class ExpensaController extends BaseController
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, Expensa $expensa)
-    {
-        $validatedData = $request->validate([
-            'idPropiedad' => 'required|integer|exists:propiedades,idPropiedad',
-            'monto' => 'required|numeric',
-            'mes' => 'required|string',
-            'status' => 'required|string',
-        ]);
+{
+    $validatedData = $request->validate([
+        'idPropiedad' => 'required|integer|exists:propiedades,idPropiedad',
+        'monto' => 'required|numeric',
+        'montoPagado' => 'optional|numeric',
+        'montoPendiente' => 'optional|numeric',
+        'mes_gestion' => 'required|string',
+        'status' => 'required|string|in:Activo,Borrado', // Validar el estado
+    ]);
 
-        // Formatear el campo 'mes' para que incluya el primer día del mes
-        $validatedData['mes'] = date('Y-m-10', strtotime($validatedData['mes']));
+    // Actualizar el estado de la expensa y otros campos
+    $expensa->idPropiedad = $validatedData['idPropiedad'];
+    $expensa->monto = $validatedData['monto'];
+    $expensa->MontoPagado = $validatedData['montoPagado'];
+    $expensa->MontoPendiente = $validatedData['montoPendiente'];
+    $expensa->mes_gestion = $validatedData['mes_gestion'];
+    $expensa->status = $validatedData['status'];
+    $expensa->save();
 
-        $expensa->update($validatedData);
-
-        // Asignar usuarios a la expensa
-        if (isset($validatedData['usuarios'])) {
-            $expensa->usuarios()->sync($validatedData['usuarios']);
-        }
-        return new ExpensaResource($expensa);
+    // Asignar usuarios a la expensa
+    if (isset($validatedData['usuarios'])) {
+        $expensa->usuarios()->sync($validatedData['usuarios']);
     }
+
+    return new ExpensaResource($expensa);
+}
 
     /**
      * Remove the specified resource from storage.
@@ -120,5 +134,25 @@ class ExpensaController extends BaseController
         $expensa->save();
 
         return response()->json(['message' => 'Expensa borrada'], 200);
+    }
+
+    public function getProperties(Request $request)
+    {
+        try {
+            $searchParams = $request->all();
+            $expensaQuery = Expensa::query();
+            $idPropiedad = Arr::get($searchParams, 'idPropiedad', null);
+
+            if (!is_null($idPropiedad)) {
+                $expensaQuery->where('idPropiedad', $idPropiedad);
+            } else {
+                return response()->json(['error' => 'ID de propiedad no proporcionado.'], 400);
+            }
+
+            $result = $expensaQuery->get();
+            return ExpensaResource::collection($result);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error interno del servidor.'], 500);
+        }
     }
 }

@@ -2,15 +2,17 @@
   <div class="app-container">
     <div class="filter-container">
       <el-input v-model="query.keyword" :placeholder="$t('table.keyword')" style="width: 200px;" class="filter-item"
-        @keyup.enter.native="handleFilter" />
+                @keyup.enter.native="handleFilter"
+      />
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         {{ $t('table.search') }}
       </el-button>
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-plus"
-        @click="handleCreate">
+                 @click="handleCreate"
+      >
         {{ $t('table.add') }}
       </el-button>
-      <el-checkbox v-model="filterStatus" @change="filterByStatus" class="filter-item" style="margin-left: 10px;">
+      <el-checkbox v-model="filterStatus" class="filter-item" style="margin-left: 10px;" @change="filterByStatus">
         Expensas Eliminadas
       </el-checkbox>
     </div>
@@ -31,46 +33,57 @@
       <el-table-column label="Acciones" width="180">
         <template slot-scope="scope">
           <el-button v-show="scope.row.status !== 'Borrado'" size="mini" type="warning"
-            @click="handleUpdate(scope.row.idPropiedad)">Editar</el-button>
+                     @click="handleUpdate(scope.row.idPropiedad)"
+          >Editar</el-button>
           <el-button v-show="scope.row.status == 'Borrado'" size="mini" type="success"
-            @click="handleRestore(scope.row)">Restore
-          </el-button>
+                     @click="handleRestore(scope.row)"
+          >Restore</el-button>
           <el-button v-show="scope.row.status !== 'Borrado'" size="mini" type="danger"
-            @click="handleDelete(scope.row.idPropiedad, scope.row.nombre)">Eliminar</el-button>
+                     @click="handleDelete(scope.row.idPropiedad, scope.row.nombre)"
+          >Eliminar</el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <pagination v-show="total > 0" :total="total" :page.sync="query.page" :limit.sync="query.limit"
-      @pagination="getList" />
-
+                @pagination="getList"
+    />
     <el-dialog :visible.sync="dialogFormVisible" :title="dialogTitle">
       <div v-loading="loading" class="form-container">
         <el-form ref="propertyForm" :rules="rules" :model="newProperty" label-position="left"
-          style="width: 400px; margin-left:50px;">
-          <el-form-item :label="$t('property.numero')" :label-width="formLabelWidth" prop="numero">
-            <el-input v-model="newProperty.numero"></el-input>
+                 style="width: 400px; margin-left:50px;"
+        >
+          <el-form-item :label="$t('Numero')" :label-width="formLabelWidth" prop="numero">
+            <el-input v-model="newProperty.numero" />
           </el-form-item>
-          <el-form-item :label="$t('property.piso')" :label-width="formLabelWidth" prop="piso">
-            <el-input v-model="newProperty.piso"></el-input>
+          <el-form-item :label="$t('Piso')" :label-width="formLabelWidth" prop="piso">
+            <el-select v-model="newProperty.piso" placeholder="Seleccione piso">
+              <el-option v-for="piso in ['1', '2', '3', '4', '5']" :key="piso" :label="piso" :value="piso" />
+            </el-select>
           </el-form-item>
-          <el-form-item :label="$t('property.nombre')" :label-width="formLabelWidth" prop="nombre">
-            <el-input v-model="newProperty.nombre"></el-input>
+          <el-form-item :label="$t('Nombre o Alias')" :label-width="formLabelWidth" prop="nombre">
+            <el-input v-model="newProperty.nombre" />
           </el-form-item>
-          <el-form-item :label="$t('property.tipo_propiedad')" :label-width="formLabelWidth" prop="tipo_propiedad">
-            <el-input v-model="newProperty.tipo_propiedad"></el-input>
+          <el-form-item :label="$t('Tipo de Propiedad')" :label-width="formLabelWidth" prop="tipo_propiedad">
+            <el-select v-model="newProperty.tipo_propiedad" placeholder="Seleccione tipo de propiedad">
+              <el-option label="Departamento" value="Departamento" />
+              <el-option label="Parqueo" value="Parqueo" />
+              <el-option label="Baulera" value="Baulera" />
+            </el-select>
           </el-form-item>
           <el-form-item label="Usuarios" :label-width="formLabelWidth" prop="usuarios">
             <el-select v-model="newProperty.usuarios" multiple placeholder="Seleccione usuarios">
               <el-option v-for="user in usuarios" :key="user.idUsuario" :label="user.nombre"
-                :value="user.idUsuario"></el-option>
+                         :value="user.idUsuario"
+              />
             </el-select>
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button @click="dialogFormVisible = false">Cancelar</el-button>
           <el-button type="primary"
-            @click="dialogStatus === 'create' ? createProperty() : updateProperty()">Guardar</el-button>
+                     @click="dialogStatus === 'create' ? createProperty() : updateProperty()"
+          >Guardar</el-button>
         </div>
       </div>
     </el-dialog>
@@ -166,7 +179,7 @@ export default {
       });
     },
     async createProperty() {
-      this.$refs['propertyForm'].validate(async (valid) => {
+      this.$refs['propertyForm'].validate(async(valid) => {
         if (valid) {
           this.loading = true;
           try {
@@ -202,7 +215,7 @@ export default {
     },
 
     async updateProperty() {
-      this.$refs['propertyForm'].validate(async (valid) => {
+      this.$refs['propertyForm'].validate(async(valid) => {
         if (valid) {
           this.loading = true;
           try {
@@ -238,12 +251,10 @@ export default {
         confirmButtonText: 'OK',
         cancelButtonText: 'Cancelar',
         type: 'warning',
-      }).then(async () => {
+      }).then(async() => {
         try {
-          const updatedPropiedad = { ...propiedad, status: 'Activo' };
-          console.log('Restoring property:', updatedPropiedad);
+          const updatedPropiedad = { ...propiedad, status: 'Activo', usuarios: propiedad.usuarios.map(usuario => usuario.idUsuario) };
           await propiedadResource.update(propiedad.idPropiedad, updatedPropiedad);
-          console.log('Property restored, fetching list...');
           this.getList();
         } catch (error) {
           console.error('Error during property restoration:', error);

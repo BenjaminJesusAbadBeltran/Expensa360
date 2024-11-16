@@ -59,8 +59,13 @@ class CajaChicaController extends BaseController
             'saldoActual' => 'required|numeric',
             'saldoFinal' => 'required|numeric',
             'fecha_Inicial' => 'required|date',
-            'fecha_Final' => 'required|date',
+            'fecha_Final'    => 'nullable|date',
         ]);
+
+        // Si fecha_Final es null, asignar fecha_Inicial
+        if (is_null($validatedData['fecha_Final'])) {
+            $validatedData['fecha_Final'] = $validatedData['fecha_Inicial'];
+        }
 
         $validatedData['status'] = $validatedData['status'] ?? 'Activo';
 

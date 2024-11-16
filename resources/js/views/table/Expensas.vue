@@ -2,59 +2,75 @@
   <div class="app-container">
     <div class="filter-container">
       <el-input v-model="query.keyword" style="width: 400px;" placeholder="Search by ID" class="filter-item"
-        @keyup.enter.native="handleFilter" />
+                @keyup.enter.native="handleFilter"
+      />
+      <el-select v-model="query.propertyId" placeholder="Select Property" class="filter-item">
+        <el-option
+          v-for="property in properties"
+          :key="property.id"
+          :label="property.nombre"
+          :value="property.idPropiedad"
+        />
+      </el-select>
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         {{ $t('table.search') }}
       </el-button>
       <el-button class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-plus"
-        @click="handleCreate">
+                 @click="handleCreate"
+      >
         {{ $t('table.add') }}
       </el-button>
-      <el-checkbox v-model="filterStatus" @change="filterByStatus" class="filter-item" style="margin-left: 10px;">
+      <el-checkbox v-model="filterStatus" class="filter-item" style="margin-left: 10px;" @change="filterByStatus">
         Expensas Eliminadas
       </el-checkbox>
     </div>
 
-    <template>
+    <div>
       <el-table v-loading="loading" :data="list" border fit highlight-current-row style="width: 100%">
         <el-table-column prop="idExpensa" label="ID" width="80" />
-        <el-table-column prop="nombrePropiedad" label="Nombre de Propiedad" />
-        <el-table-column prop="monto" label="Monto" />
-        <el-table-column label="Mes">
-        <template slot-scope="scope">
-          {{ getMonthInLetters(scope.row.mes) }}
-        </template>
-      </el-table-column>
-        <el-table-column label="Acciones" width="280">
+        <el-table-column prop="nombrePropiedad" label="Propiedad" />
+        <el-table-column prop="monto" label="Valor Total" />
+        <el-table-column prop="montoPagado" label="Valor Pagado" />
+        <el-table-column prop="montoPendiente" label="Valor Pendiente" />
+        <el-table-column prop="montoAhorro" label="Valor Ahorro" />
+        <el-table-column label="Mensualidad">
           <template slot-scope="scope">
-          <el-button v-show="scope.row.status !== 'Borrado'" size="mini" type="warning" @click="handleUpdate(scope.row.idExpensa)">Editar</el-button>
-          <el-button v-show="scope.row.status == 'Borrado'" size="mini" type="success"
-            @click="handleRestore(scope.row)">Restore
-          </el-button>
-          <el-button v-show="scope.row.status !== 'Borrado'" size="mini" type="danger"
-            @click="handleDelete(scope.row.idExpensa, scope.row.monto)">Eliminar</el-button>
-        </template>
+            {{ getMonthInLetters(scope.row.mes_gestion) }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="estado" label="Estado" />
+        <el-table-column label="Acciones" width="280">
+          <div slot-scope="scope">
+            <el-button v-show="scope.row.status !== 'Borrado'" size="mini" type="warning" @click="handleUpdate(scope.row.idExpensa)">Editar</el-button>
+            <el-button v-show="scope.row.status == 'Borrado'" size="mini" type="success"
+                       @click="handleRestore(scope.row)"
+            >Restore</el-button>
+            <el-button v-show="scope.row.status !== 'Borrado'" size="mini" type="danger"
+                       @click="handleDelete(scope.row.idExpensa, scope.row.monto)"
+            >Eliminar</el-button>
+          </div>
         </el-table-column>
       </el-table>
-    </template>
+    </div>
 
     <pagination v-show="total > 0" :total="total" :page.sync="query.page" :limit.sync="query.limit"
-      @pagination="getList" />
-
+                @pagination="getList"
+    />
     <el-dialog :visible.sync="dialogFormVisible" :title="dialogTitle">
       <div v-loading="loading" class="form-container">
-        <el-form :model="newExpensa" ref="expensaForm" :rules="rules">
+        <el-form ref="expensaForm" :model="newExpensa" :rules="rules">
           <el-form-item label="Propiedad" :label-width="formLabelWidth" prop="idPropiedad">
             <el-select v-model="newExpensa.idPropiedad" placeholder="Seleccione una propiedad">
               <el-option v-for="property in properties" :key="property.idPropiedad" :label="property.nombre"
-                :value="property.idPropiedad" />
+                         :value="property.idPropiedad"
+              />
             </el-select>
           </el-form-item>
           <el-form-item label="Expensa" :label-width="formLabelWidth" prop="monto">
             <el-input v-model="newExpensa.monto" />
           </el-form-item>
-          <el-form-item label="Mes" :label-width="formLabelWidth" prop="mes">
-            <el-date-picker v-model="newExpensa.mes" type="month" placeholder="Seleccione el mes" />
+          <el-form-item label="mes_gestion" :label-width="formLabelWidth" prop="mes_gestion">
+            <el-date-picker v-model="newExpensa.mes_gestion" type="month" placeholder="Seleccione el mes_gestion" />
           </el-form-item>
         </el-form>
 
@@ -93,11 +109,12 @@ export default {
         keyword: '',
         page: 1,
         limit: 15,
+        propertyId: '',
       },
       newExpensa: {
         idPropiedad: '',
         monto: '',
-        mes: '',
+        mes_gestion: '',
         status: 'Activo',
       },
       properties: [],
@@ -145,9 +162,9 @@ export default {
         this.$message.error('An error occurred while fetching properties');
       }
     },
-    getMonthInLetters(dateString) {
-      const date = new Date(dateString);
-      const options = { month: 'long' };
+    getMonthInLetters(mes_gestion) {
+      const date = new Date(mes_gestion);
+      const options = { year: 'numeric', month: 'long' };
       return date.toLocaleDateString('es-ES', options);
     },
     filterByStatus() {
@@ -168,13 +185,13 @@ export default {
       });
     },
     async createData() {
-      this.$refs['expensaForm'].validate(async (valid) => {
+      this.$refs['expensaForm'].validate(async(valid) => {
         if (valid) {
           this.loading = true;
           // Formatear la fecha antes de enviarla al backend
           const formattedExpensa = {
             ...this.newExpensa,
-            mes: new Date(this.newExpensa.mes).toISOString().split('T')[0],
+            mes_gestion: this.newExpensa.mes_gestion, // Assuming mes_gestion is already in YYYY-MM format
           };
           try {
             await expensaResource.store(formattedExpensa);
@@ -205,15 +222,15 @@ export default {
       }
     },
     updateData() {
-      this.$refs['expensaForm'].validate(async (valid) => {
+      this.$refs['expensaForm'].validate(async(valid) => {
         if (valid) {
           this.loading = true;
           // Formatear la fecha antes de enviarla al backend
-          const date = new Date(this.newExpensa.mes);
+          const date = new Date(this.newExpensa.mes_gestion);
           date.setDate(2); // Establecer el día al 02
           const formattedExpensa = {
             ...this.newExpensa,
-            mes: date.toISOString().split('T')[0], // Formato YYYY-MM-DD
+            mes_gestion: date.toISOString().split('T')[0], // Formato YYYY-MM-DD
           };
           try {
             await expensaResource.update(this.newExpensa.idExpensa, formattedExpensa);
@@ -232,7 +249,7 @@ export default {
         confirmButtonText: 'OK',
         cancelButtonText: 'Cancel',
         type: 'warning',
-      }).then(async () => {
+      }).then(async() => {
         try {
           await expensaResource.destroy(idExpensa);
           this.getList();
@@ -246,12 +263,14 @@ export default {
         confirmButtonText: 'OK',
         cancelButtonText: 'Cancel',
         type: 'warning',
-      }).then(async () => {
+      }).then(async() => {
         try {
           const updatedExpensa = { ...expensa, status: 'Activo' };
-          await expensaResource.update(expensa.idExpensa, updatedExpensa);
+          const response = await expensaResource.update(expensa.idExpensa, updatedExpensa);
+          console.log('API response:', response);
           this.getList();
         } catch (error) {
+          console.error('Error occurred while updating expensa:', error);
           this.$message.error('An error occurred while recovering data');
         }
       }).catch(() => {
@@ -263,7 +282,7 @@ export default {
         idExpensa: '',
         idPropiedad: '',
         monto: '',
-        mes: '',
+        mes_gestion: '',
         status: 'Activo',
       };
     },

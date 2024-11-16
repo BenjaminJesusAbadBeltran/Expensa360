@@ -2,15 +2,17 @@
   <div class="app-container">
     <div class="filter-container">
       <el-input v-model="query.keyword" :placeholder="$t('table.keyword')" style="width: 200px;" class="filter-item"
-        @keyup.enter.native="handleFilter" />
+                @keyup.enter.native="handleFilter"
+      />
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         {{ $t('table.search') }}
       </el-button>
       <el-button class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-plus"
-        @click="handleCreate">
+                 @click="handleCreate"
+      >
         {{ $t('table.add') }}
       </el-button>
-      <el-checkbox v-model="filterStatus" @change="filterByStatus" class="filter-item" style="margin-left: 10px;">
+      <el-checkbox v-model="filterStatus" class="filter-item" style="margin-left: 10px;" @change="filterByStatus">
         Pagos Eliminados
       </el-checkbox>
     </div>
@@ -48,35 +50,44 @@
       </el-table-column>
       <el-table-column align="center" label="Actions" width="200">
         <template slot-scope="scope">
-          <el-button size="mini" type="primary" @click="handleUpdate(scope.row.idCajaChica)">Edit</el-button>
+          <el-button size="mini" type="primary"
+                     @click="handleUpdate(scope.row.idCajaChica)"
+          >Edit</el-button>
           <el-button v-show="scope.row.status == 'Borrado'" size="mini" type="success"
-            @click="handleRestore(scope.row)">Restore</el-button>
+                     @click="handleRestore(scope.row)"
+          >Restore</el-button>
           <el-button v-show="scope.row.status !== 'Borrado'" size="mini" type="danger"
-            @click="handleDelete(scope.row.idCajaChica)">Delete</el-button>
+                     @click="handleDelete(scope.row.idCajaChica)"
+          >Delete</el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <pagination v-show="total > 0" :total="total" :page.sync="query.page" :limit.sync="query.limit"
-      @pagination="getList" />
-
+                @pagination="getList"
+    />
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="cajaChicaForm" :rules="rules" :model="newCajaChica" label-position="left" label-width="120px"
-        style="width: 400px; margin-left:50px;">
+               style="width: 400px; margin-left:50px;"
+      >
         <el-form-item :label="$t('Saldo Inicial')" prop="saldoInicial">
-          <el-input v-model="newCajaChica.saldoInicial"></el-input>
+          <el-input v-model="newCajaChica.saldoInicial" />
         </el-form-item>
         <el-form-item :label="$t('Saldo Actual')" prop="saldoActual">
-          <el-input v-model="newCajaChica.saldoActual"></el-input>
+          <el-input v-model="newCajaChica.saldoActual" />
         </el-form-item>
         <el-form-item :label="$t('Saldo Final')" prop="saldoFinal">
-          <el-input v-model="newCajaChica.saldoFinal"></el-input>
+          <el-input v-model="newCajaChica.saldoFinal" />
         </el-form-item>
         <el-form-item :label="$t('Fecha Inicial')" prop="fecha_Inicial">
-          <el-date-picker v-model="newCajaChica.fecha_Inicial" type='date' placeholder="Select date"></el-date-picker>
+          <el-date-picker v-model="newCajaChica.fecha_Inicial" type="date" placeholder="Select start date"
+                          value-format="yyyy-MM-dd"
+          />
         </el-form-item>
         <el-form-item :label="$t('Fecha Final')" prop="fecha_Final">
-          <el-date-picker v-model="newCajaChica.fecha_Final" type='date' placeholder="Select date"></el-date-picker>
+          <el-date-picker v-model="newCajaChica.fecha_Final" type="date" placeholder="Select end date"
+                          value-format="yyyy-MM-dd"
+          />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -123,7 +134,6 @@ export default {
         create: 'Create',
         update: 'Update',
       },
-      total: 0,
       formLabelWidth: '150px',
       rules: {
         saldoInicial: [{ required: true, message: 'Saldo Inicial is required', trigger: 'blur' }],
@@ -163,41 +173,49 @@ export default {
       });
     },
     async createData() {
-      this.$refs['cajaChicaForm'].validate(async (valid) => {
+      this.$refs['cajaChicaForm'].validate(async(valid) => {
         if (valid) {
           this.loading = true;
-          // Formatear las fechas antes de enviarlas al backend
-          const formattedCajaChica = {
+
+          // Use the dates directly from el-date-picker
+          const cajaChicaData = {
             ...this.newCajaChica,
-            fecha_Inicial: new Date(this.newCajaChica.fecha_Inicial).toISOString().split('T')[0],
-            fecha_Final: new Date(this.newCajaChica.fecha_Final).toISOString().split('T')[0],
+            fecha_Inicial: this.newCajaChica.fecha_Inicial,
+            fecha_Final: this.newCajaChica.fecha_Final,
           };
+
+          // Debug: Check the date values
+          console.log('fecha_Inicial:', this.newCajaChica.fecha_Inicial);
+          console.log('fecha_Final:', this.newCajaChica.fecha_Final);
+
           cajaChicaResource
-            .store(formattedCajaChica)
+            .store(cajaChicaData)
             .then(response => {
               this.$message({
                 message: 'New Caja Chica has been created successfully.',
                 type: 'success',
-                duration: 5 * 1000,
+                duration: 5000,
               });
               this.resetNewCajaChica();
               this.dialogFormVisible = false;
               this.handleFilter();
             })
             .catch(error => {
-              this.$message.error('An error occurred while saving data');
+              console.error(error); // Log the error
+              this.$message({
+                message: 'An error occurred while creating the Caja Chica.',
+                type: 'error',
+                duration: 5000,
+              });
             })
             .finally(() => {
               this.loading = false;
             });
-        } else {
-          this.$message.error('Failed to create data');
-          return;
         }
       });
     },
     async updateData() {
-      this.$refs['cajaChicaForm'].validate(async (valid) => {
+      this.$refs['cajaChicaForm'].validate(async(valid) => {
         if (valid) {
           // Formatear las fechas antes de enviarlas al backend
           const formattedCajaChica = {
@@ -239,13 +257,15 @@ export default {
         confirmButtonText: 'OK',
         cancelButtonText: 'Cancel',
         type: 'warning',
-      }).then(async () => {
+      }).then(async() => {
         try {
           await cajaChicaResource.destroy(idCajaChica);
-          this.getList(); 
+          this.getList();
         } catch (error) {
           this.$message.error('An error occurred while deleting data');
         }
+      }).catch(() => {
+        this.$message.info('Delete cancelled');
       });
     },
     async handleRestore(cajaChica) {
@@ -253,7 +273,7 @@ export default {
         confirmButtonText: 'OK',
         cancelButtonText: 'Cancel',
         type: 'warning',
-      }).then(async () => {
+      }).then(async() => {
         try {
           const updatedExpensa = { ...cajaChica, status: 'Activo' };
           await cajaChicaResource.update(cajaChica.idCajaChica, updatedExpensa);
@@ -267,13 +287,12 @@ export default {
     },
     resetNewCajaChica() {
       this.newCajaChica = {
-        idCajaChica:null,
         saldoInicial: '',
         saldoActual: '',
         saldoFinal: '',
         fecha_Inicial: '',
         fecha_Final: '',
-        status: '',
+        status: 'Activo',
       };
     },
   },

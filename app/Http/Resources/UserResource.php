@@ -24,7 +24,7 @@ class UserResource extends JsonResource
             'status' => $this->status,
             'roles' => $this->roles->pluck('name')->toArray(),
             'permissions' => $this->getAllPermissions()->pluck('name')->toArray(),
-            'avatar' => 'https://i.pravatar.cc',
+            'propiedades' => PropiedadResource::collection($this->whenLoaded('propiedades')),
         ];
     }
 }

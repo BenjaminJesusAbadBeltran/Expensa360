@@ -2,15 +2,17 @@
   <div class="app-container">
     <div class="filter-container">
       <el-input v-model="query.keyword" style="width: 400px;" placeholder="Buscar por Tipo de Cuenta"
-        class="filter-item" @keyup.enter.native="handleFilter" />
+                class="filter-item" @keyup.enter.native="handleFilter"
+      />
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         {{ $t('table.search') }}
       </el-button>
       <el-button class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-plus"
-        @click="handleCreate">
+                 @click="handleCreate"
+      >
         {{ $t('table.add') }}
       </el-button>
-      <el-checkbox v-model="filterStatus" @change="filterByStatus" class="filter-item" style="margin-left: 10px;">
+      <el-checkbox v-model="filterStatus" class="filter-item" style="margin-left: 10px;" @change="filterByStatus">
         Metodos de Pago Eliminados
       </el-checkbox>
     </div>
@@ -22,19 +24,21 @@
         <template slot-scope="scope">
           <el-button size="mini" type="warning" @click="handleEdit(scope.row.idMetodo)">Edit</el-button>
           <el-button v-show="scope.row.status == 'Borrado'" size="mini" type="success"
-            @click="handleRestore(scope.row)">Restore</el-button>
+                     @click="handleRestore(scope.row)"
+          >Restore</el-button>
           <el-button v-show="scope.row.status !== 'Borrado'" size="mini" type="danger"
-          @click="handleDelete(scope.row.idMetodo, scope.row.nombre)">Eliminar</el-button>
+                     @click="handleDelete(scope.row.idMetodo, scope.row.nombre)"
+          >Eliminar</el-button>
           <el-button size="mini" type="info" @click="showImage(scope.row.imagen)">Show Image</el-button>
         </template>
       </el-table-column>
     </el-table>
     <pagination v-show="total > 0" :total="total" :page.sync="query.page" :limit.sync="query.limit"
-      @pagination="getList" />
-
+                @pagination="getList"
+    />
     <el-dialog :visible.sync="dialogFormVisible" :title="dialogTitle">
       <div v-loading="loading" class="form-container">
-        <el-form :model="newMetodoPago" ref="metodoPagoForm" :rules="rules">
+        <el-form ref="metodoPagoForm" :model="newMetodoPago" :rules="rules">
           <el-form-item label="Tipo de Cuenta" prop="nombre" :label-width="formLabelWidth">
             <el-input v-model="newMetodoPago.nombre" autocomplete="off" />
           </el-form-item>
@@ -42,7 +46,7 @@
             <el-input v-model="newMetodoPago.cuenta" autocomplete="off" />
           </el-form-item>
           <el-form-item label="Imagen" prop="imagen" :label-width="formLabelWidth">
-            <input type="file" @change="handleImageChange" />
+            <input type="file" @change="handleImageChange">
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -53,7 +57,7 @@
     </el-dialog>
 
     <el-dialog :visible.sync="imageDialogVisible" title="Image">
-      <img :src="imageSrc" alt="Image" style="width: 100%;" />
+      <img :src="imageSrc" alt="Image" style="width: 100%;">
       <div slot="footer" class="dialog-footer">
         <el-button @click="imageDialogVisible = false">Close</el-button>
       </div>
@@ -203,7 +207,7 @@ export default {
         confirmButtonText: 'OK',
         cancelButtonText: 'Cancel',
         type: 'warning',
-      }).then(async () => {
+      }).then(async() => {
         try {
           console.log('Deleting MetodoPago with ID:', idMetodo);
           const response = await metodoPagoResource.destroy(idMetodo);
@@ -234,22 +238,22 @@ export default {
     handleImageChange(event) {
       const file = event.target.files[0];
       if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.newMetodoPago.imagen = e.target.result;
-      };
-      reader.readAsDataURL(file);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.newMetodoPago.imagen = e.target.result;
+        };
+        reader.readAsDataURL(file);
       }
     },
     showImage(image) {
       if (!image) {
-      this.$message.error('No image available');
-      return;
+        this.$message.error('No image available');
+        return;
       }
       if (image.startsWith('data:image')) {
-      this.imageSrc = image;
+        this.imageSrc = image;
       } else {
-      this.imageSrc = `/storage/${image}`;
+        this.imageSrc = `/storage/${image}`;
       }
       this.imageDialogVisible = true;
     },
@@ -258,7 +262,7 @@ export default {
         confirmButtonText: 'OK',
         cancelButtonText: 'Cancel',
         type: 'warning',
-      }).then(async () => {
+      }).then(async() => {
         try {
           const response = await metodoPagoResource.get(metodoPago.idMetodo);
           if (response && response.data) {

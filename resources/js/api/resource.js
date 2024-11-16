@@ -44,7 +44,6 @@ class Resource {
   request(options) {
     return request(options);
   }
-
 }
 
 export { Resource as default };
